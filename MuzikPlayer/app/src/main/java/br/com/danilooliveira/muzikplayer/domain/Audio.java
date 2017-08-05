@@ -2,6 +2,7 @@ package br.com.danilooliveira.muzikplayer.domain;
 
 import android.database.Cursor;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 
 /**
  * Criado por Danilo de Oliveira (danilo.desenvolvedor@outlook.com) em 04/08/2017.
@@ -12,6 +13,7 @@ public class Audio {
     private String title;
     private String artist;
     private String albumId;
+    private String albumArt;
     private String data;
 
     public Audio(Cursor cursor) {
@@ -36,6 +38,15 @@ public class Audio {
 
     public String getAlbumId() {
         return albumId;
+    }
+
+    @Nullable
+    public String getAlbumArt() {
+        return albumArt;
+    }
+
+    public void setAlbumArt(@Nullable String albumArt) {
+        this.albumArt = albumArt;
     }
 
     public String getData() {

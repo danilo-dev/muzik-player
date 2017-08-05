@@ -3,7 +3,6 @@ package br.com.danilooliveira.muzikplayer.adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.widget.RecyclerView;
@@ -13,6 +12,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
+import java.io.File;
 import java.util.List;
 
 import br.com.danilooliveira.muzikplayer.R;
@@ -70,41 +72,45 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.AudioViewHol
             txtTitle.setText(audio.getTitle());
             txtArtist.setText(audio.getArtist());
 
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Uri albumUri = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI;
-                    String[] albumColumns = {
-                            MediaStore.Audio.Albums._ID,
-                            MediaStore.Audio.AlbumColumns.ALBUM_ART
-                    };
-                    String albumConditions = MediaStore.Audio.Albums._ID + "= ?";
-                    String albumArgs = audio.getAlbumId();
+            if (audio.getAlbumId() != null) {
+                if (audio.getAlbumArt() == null) {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (audio.getAlbumArt() == null) {
+                                Uri albumUri = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI;
+                                String[] albumColumns = {
+                                        MediaStore.Audio.Albums._ID,
+                                        MediaStore.Audio.AlbumColumns.ALBUM_ART
+                                };
+                                String albumConditions = MediaStore.Audio.Albums._ID + "= ?";
+                                String albumArgs = audio.getAlbumId();
 
-                    final String albumArt;
 
-                    Cursor albumCursor = mContext.getContentResolver().query(albumUri, albumColumns, albumConditions, new String[] {albumArgs}, null);
-                    if (albumCursor != null) {
-                        if (albumCursor.moveToNext()) {
-                            albumArt = albumCursor.getString(albumCursor.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.ALBUM_ART));
-                        } else {
-                            albumArt = null;
-                        }
-                        albumCursor.close();
-                    } else {
-                        albumArt = null;
-                    }
-
-                    if (albumArt != null) {
-                        ((Activity) mContext).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                imgAlbumArt.setImageBitmap(BitmapFactory.decodeFile(albumArt));
+                                Cursor albumCursor = mContext.getContentResolver().query(albumUri, albumColumns, albumConditions, new String[] {albumArgs}, null);
+                                if (albumCursor != null) {
+                                    if (albumCursor.moveToNext()) {
+                                        audio.setAlbumArt(albumCursor.getString(albumCursor.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.ALBUM_ART)));
+                                    }
+                                    albumCursor.close();
+                                }
                             }
-                        });
-                    }
+
+                            if (audio.getAlbumArt() != null) {
+                                ((Activity) mContext).runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Picasso.with(mContext).load(Uri.fromFile(new File(audio.getAlbumArt()))).into(imgAlbumArt);
+                                    }
+                                });
+                            }
+
+                        }
+                    }).start();
+                } else {
+                    Picasso.with(mContext).load(Uri.fromFile(new File(audio.getAlbumArt()))).into(imgAlbumArt);
                 }
-            }).start();
+            }
 
             this.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
