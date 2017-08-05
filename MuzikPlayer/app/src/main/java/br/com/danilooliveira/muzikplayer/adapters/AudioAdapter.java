@@ -51,6 +51,10 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.AudioViewHol
         return audioList != null ? audioList.size() : 0;
     }
 
+    public List<Audio> getAudioList() {
+        return audioList;
+    }
+
     public void setAudioList(List<Audio> audioList) {
         this.audioList = audioList;
         notifyDataSetChanged();

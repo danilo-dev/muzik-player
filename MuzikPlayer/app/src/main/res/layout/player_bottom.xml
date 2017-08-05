@@ -14,7 +14,7 @@
     android:paddingEnd="16dp"
     android:paddingRight="16dp"
     android:paddingBottom="8dp"
-
+    android:visibility="gone"
     tools:showIn="@layout/app_bar_main"
     >
     <LinearLayout
@@ -25,14 +25,12 @@
         >
         <TextView
             android:id="@+id/txt_current_media_title"
-            android:text="Miracles"
             android:textSize="16sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             />
         <TextView
             android:id="@+id/txt_current_media_artist"
-            android:text="Coldplay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             />
@@ -44,6 +42,15 @@
         android:layout_height="32dp"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_pause"
+        style="@style/Base.Widget.AppCompat.Button.Borderless"
+        />
+    <ImageButton
+        android:id="@+id/btn_player_bottom_next"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_skip_next"
         style="@style/Base.Widget.AppCompat.Button.Borderless"
         />
 </LinearLayout>

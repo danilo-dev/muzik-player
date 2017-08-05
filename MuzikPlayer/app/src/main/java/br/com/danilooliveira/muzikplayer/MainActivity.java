@@ -21,6 +21,7 @@ import android.widget.TextView;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import br.com.danilooliveira.muzikplayer.adapters.AudioAdapter;
 import br.com.danilooliveira.muzikplayer.domain.Audio;
@@ -32,7 +33,7 @@ public class MainActivity extends AppCompatActivity
     private View playerBottomControl;
     private TextView txtCurrentMediaTitle;
     private TextView txtCurrentMediaArtist;
-    private ImageButton btnPlayerStateControl;
+    private ImageButton btnPlayerBottomStateControl;
 
     private MediaPlayer mediaPlayer;
     private AudioAdapter mAudioAdapter;
@@ -48,7 +49,8 @@ public class MainActivity extends AppCompatActivity
         playerBottomControl = findViewById(R.id.player_bottom_control);
         txtCurrentMediaTitle = (TextView) findViewById(R.id.txt_current_media_title);
         txtCurrentMediaArtist = (TextView) findViewById(R.id.txt_current_media_artist);
-        btnPlayerStateControl = (ImageButton) findViewById(R.id.btn_player_bottom_state_control);
+        btnPlayerBottomStateControl = (ImageButton) findViewById(R.id.btn_player_bottom_state_control);
+        ImageButton btnPlayerBottomNext = (ImageButton) findViewById(R.id.btn_player_bottom_next);
         RecyclerView recyclerView = (RecyclerView) findViewById(android.R.id.list);
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 
@@ -69,6 +71,25 @@ public class MainActivity extends AppCompatActivity
         recyclerView.setAdapter(mAudioAdapter);
 
         navigationView.setNavigationItemSelectedListener(this);
+
+        btnPlayerBottomStateControl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!mediaPlayer.isPlaying()) {
+                    btnPlayerBottomStateControl.setImageResource(R.drawable.ic_pause);
+                    mediaPlayer.start();
+                } else {
+                    btnPlayerBottomStateControl.setImageResource(R.drawable.ic_play);
+                    mediaPlayer.pause();
+                }
+            }
+        });
+        btnPlayerBottomNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onNextSong();
+            }
+        });
 
         findAudioFiles();
     }
@@ -93,32 +114,27 @@ public class MainActivity extends AppCompatActivity
         try {
             mediaPlayer.setDataSource(audio.getData());
             mediaPlayer.prepare();
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mediaPlayer) {
+                    btnPlayerBottomStateControl.setImageResource(R.drawable.ic_play);
+                    onNextSong();
+                }
+            });
 
             txtCurrentMediaTitle.setText(audio.getTitle());
             txtCurrentMediaArtist.setText(audio.getArtist());
-            btnPlayerStateControl.setImageResource(R.drawable.ic_pause);
+            btnPlayerBottomStateControl.setImageResource(R.drawable.ic_pause);
             playerBottomControl.setVisibility(View.VISIBLE);
-
-            btnPlayerStateControl.setOnClickListener(new View.OnClickListener() {
-                private boolean isPlaying = true;
-
-                @Override
-                public void onClick(View view) {
-                    isPlaying = !isPlaying;
-                    if (isPlaying) {
-                        btnPlayerStateControl.setImageResource(R.drawable.ic_pause);
-                        mediaPlayer.start();
-                    } else {
-                        btnPlayerStateControl.setImageResource(R.drawable.ic_play);
-                        mediaPlayer.pause();
-                    }
-                }
-            });
 
             mediaPlayer.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void onNextSong() {
+        onPlayAudio(mAudioAdapter.getAudioList().get(new Random().nextInt(mAudioAdapter.getItemCount())));
     }
 
     private void findAudioFiles() {
