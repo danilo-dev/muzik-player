@@ -13,11 +13,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +36,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private DrawerLayout mDrawerLayout;
     private View playerBottomControl;
+    private ImageView imgAlbumArt;
     private TextView txtCurrentMediaTitle;
     private TextView txtCurrentMediaArtist;
     private ImageButton btnPlayerBottomStateControl;
@@ -47,6 +53,7 @@ public class MainActivity extends AppCompatActivity
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         playerBottomControl = findViewById(R.id.player_bottom_control);
+        imgAlbumArt = (ImageView) findViewById(R.id.img_album_art);
         txtCurrentMediaTitle = (TextView) findViewById(R.id.txt_current_media_title);
         txtCurrentMediaArtist = (TextView) findViewById(R.id.txt_current_media_artist);
         btnPlayerBottomStateControl = (ImageButton) findViewById(R.id.btn_player_bottom_state_control);
@@ -101,6 +108,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.activity_main_menu, menu);
+        return true;
+    }
+
+    @Override
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             mDrawerLayout.closeDrawer(GravityCompat.START);
@@ -122,6 +136,15 @@ public class MainActivity extends AppCompatActivity
                 }
             });
 
+            if (audio.getAlbumArt() != null) {
+                Picasso.with(this)
+                        .load(Uri.fromFile(new File(audio.getAlbumArt())))
+                        .into(imgAlbumArt);
+            } else {
+                Picasso.with(this)
+                        .load(R.drawable.ic_placeholder_album_small)
+                        .into(imgAlbumArt);
+            }
             txtCurrentMediaTitle.setText(audio.getTitle());
             txtCurrentMediaArtist.setText(audio.getArtist());
             btnPlayerBottomStateControl.setImageResource(R.drawable.ic_pause);

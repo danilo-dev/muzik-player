@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/player_bottom_control"
     android:background="@color/player_bottom"
     android:layout_width="match_parent"
@@ -15,16 +14,23 @@
     android:paddingEnd="16dp"
     android:paddingRight="16dp"
     android:paddingBottom="8dp"
-    android:elevation="4dp"
-    app:elevation="4dp"
     android:visibility="gone"
     tools:showIn="@layout/app_bar_main"
     >
+    <ImageView
+        android:id="@+id/img_album_art"
+        android:contentDescription="@string/cd_album_art"
+        android:layout_width="@dimen/album_art_medium"
+        android:layout_height="@dimen/album_art_medium"
+        android:src="@drawable/ic_placeholder_album_small"
+        />
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
         >
         <TextView
             android:id="@+id/txt_current_media_title"
@@ -42,6 +48,7 @@
     </LinearLayout>
     <ImageButton
         android:id="@+id/btn_player_bottom_state_control"
+        android:contentDescription="@string/cd_btn_state_control"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:layout_width="32dp"
         android:layout_height="32dp"
@@ -52,6 +59,7 @@
         />
     <ImageButton
         android:id="@+id/btn_player_bottom_next"
+        android:contentDescription="@string/cd_btn_next_track"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:layout_width="32dp"
         android:layout_height="32dp"
