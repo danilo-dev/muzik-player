@@ -14,7 +14,7 @@
     android:paddingEnd="16dp"
     android:paddingRight="16dp"
     android:paddingBottom="8dp"
-    android:visibility="gone"
+
     tools:showIn="@layout/app_bar_main"
     >
     <ImageView
@@ -33,41 +33,39 @@
         android:layout_marginLeft="8dp"
         >
         <TextView
-            android:id="@+id/txt_current_media_title"
+            android:id="@+id/txt_current_track_title"
             android:textColor="@color/text_player_bottom_primary"
             android:textSize="16sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             />
         <TextView
-            android:id="@+id/txt_current_media_artist"
+            android:id="@+id/txt_current_track_artist"
             android:textColor="@color/text_player_bottom_primary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             />
     </LinearLayout>
     <ImageButton
+        android:id="@+id/btn_player_bottom_previous"
+        android:contentDescription="@string/cd_btn_previous_track"
+        android:src="@drawable/ic_skip_previous"
+        style="@style/ImageButtonControlPlayerBottom"
+        />
+    <ImageButton
         android:id="@+id/btn_player_bottom_state_control"
         android:contentDescription="@string/cd_btn_state_control"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:scaleType="fitCenter"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:src="@drawable/ic_pause"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark"
-        style="@style/Base.Widget.AppCompat.Button.Borderless"
+        style="@style/ImageButtonControlPlayerBottom"
         />
     <ImageButton
         android:id="@+id/btn_player_bottom_next"
         android:contentDescription="@string/cd_btn_next_track"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:scaleType="fitCenter"
         android:src="@drawable/ic_skip_next"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark"
-        style="@style/Base.Widget.AppCompat.Button.Borderless"
+        style="@style/ImageButtonControlPlayerBottom"
         />
 </LinearLayout>

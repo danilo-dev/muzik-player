@@ -8,7 +8,7 @@ import android.support.annotation.Nullable;
  * Criado por Danilo de Oliveira (danilo.desenvolvedor@outlook.com) em 04/08/2017.
  */
 
-public class Audio {
+public class Track {
     private String id;
     private String title;
     private String artist;
@@ -16,7 +16,7 @@ public class Audio {
     private String albumArt;
     private String data;
 
-    public Audio(Cursor cursor) {
+    public Track(Cursor cursor) {
         id = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
         title = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
         artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));

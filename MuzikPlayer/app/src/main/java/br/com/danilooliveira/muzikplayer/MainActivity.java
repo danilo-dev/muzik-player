@@ -28,9 +28,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import br.com.danilooliveira.muzikplayer.adapters.AudioAdapter;
-import br.com.danilooliveira.muzikplayer.domain.Audio;
-import br.com.danilooliveira.muzikplayer.interfaces.OnAudioClickListener;
+import br.com.danilooliveira.muzikplayer.adapters.TrackAdapter;
+import br.com.danilooliveira.muzikplayer.domain.Track;
+import br.com.danilooliveira.muzikplayer.interfaces.OnTrackClickListener;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -42,7 +42,10 @@ public class MainActivity extends AppCompatActivity
     private ImageButton btnPlayerBottomStateControl;
 
     private MediaPlayer mediaPlayer;
-    private AudioAdapter mAudioAdapter;
+    private TrackAdapter mTrackAdapter;
+
+    private List<Track> trackHistoryList = new ArrayList<>();
+    private int currentPosition = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,9 +57,10 @@ public class MainActivity extends AppCompatActivity
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         playerBottomControl = findViewById(R.id.player_bottom_control);
         imgAlbumArt = (ImageView) findViewById(R.id.img_album_art);
-        txtCurrentMediaTitle = (TextView) findViewById(R.id.txt_current_media_title);
-        txtCurrentMediaArtist = (TextView) findViewById(R.id.txt_current_media_artist);
+        txtCurrentMediaTitle = (TextView) findViewById(R.id.txt_current_track_title);
+        txtCurrentMediaArtist = (TextView) findViewById(R.id.txt_current_track_artist);
         btnPlayerBottomStateControl = (ImageButton) findViewById(R.id.btn_player_bottom_state_control);
+        ImageButton btnPlayerBottomPrevious = (ImageButton) findViewById(R.id.btn_player_bottom_previous);
         ImageButton btnPlayerBottomNext = (ImageButton) findViewById(R.id.btn_player_bottom_next);
         RecyclerView recyclerView = (RecyclerView) findViewById(android.R.id.list);
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -68,14 +72,21 @@ public class MainActivity extends AppCompatActivity
         mDrawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        mAudioAdapter = new AudioAdapter(this, new OnAudioClickListener() {
+        mTrackAdapter = new TrackAdapter(this, new OnTrackClickListener() {
             @Override
-            public void onAudioClick(Audio audio) {
-                onPlayAudio(audio);
+            public void onTrackClick(Track track) {
+                currentPosition = 0;
+
+                if (!trackHistoryList.isEmpty()) {
+                    trackHistoryList.clear();
+                }
+
+                trackHistoryList.add(track);
+                onPlayTrack(track);
             }
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(mAudioAdapter);
+        recyclerView.setAdapter(mTrackAdapter);
 
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -91,14 +102,20 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         });
+        btnPlayerBottomPrevious.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onPreviousTrack();
+            }
+        });
         btnPlayerBottomNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onNextSong();
+                onNextTrack();
             }
         });
 
-        findAudioFiles();
+        findTrackFiles();
     }
 
     @Override
@@ -123,30 +140,30 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void onPlayAudio(Audio audio) {
+    private void onPlayTrack(Track track) {
         mediaPlayer.reset();
         try {
-            mediaPlayer.setDataSource(audio.getData());
+            mediaPlayer.setDataSource(track.getData());
             mediaPlayer.prepare();
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mediaPlayer) {
                     btnPlayerBottomStateControl.setImageResource(R.drawable.ic_play);
-                    onNextSong();
+                    onNextTrack();
                 }
             });
 
-            if (audio.getAlbumArt() != null) {
+            if (track.getAlbumArt() != null) {
                 Picasso.with(this)
-                        .load(Uri.fromFile(new File(audio.getAlbumArt())))
+                        .load(Uri.fromFile(new File(track.getAlbumArt())))
                         .into(imgAlbumArt);
             } else {
                 Picasso.with(this)
                         .load(R.drawable.ic_placeholder_album_small)
                         .into(imgAlbumArt);
             }
-            txtCurrentMediaTitle.setText(audio.getTitle());
-            txtCurrentMediaArtist.setText(audio.getArtist());
+            txtCurrentMediaTitle.setText(track.getTitle());
+            txtCurrentMediaArtist.setText(track.getArtist());
             btnPlayerBottomStateControl.setImageResource(R.drawable.ic_pause);
             playerBottomControl.setVisibility(View.VISIBLE);
 
@@ -156,14 +173,45 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void onNextSong() {
-        onPlayAudio(mAudioAdapter.getAudioList().get(new Random().nextInt(mAudioAdapter.getItemCount())));
+    private void onPreviousTrack() {
+        Track track;
+
+        currentPosition--;
+
+        if (currentPosition < 0) {
+            currentPosition = 0;
+            track = getRandomTrack();
+            trackHistoryList.add(0, track);
+        } else {
+            track = trackHistoryList.get(currentPosition);
+        }
+
+        onPlayTrack(track);
     }
 
-    private void findAudioFiles() {
-        Uri audioUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+    private void onNextTrack() {
+        Track track;
 
-        String[] audioColumns = {
+        currentPosition++;
+
+        if (currentPosition >= trackHistoryList.size()) {
+            track = getRandomTrack();
+            trackHistoryList.add(track);
+        } else {
+            track = trackHistoryList.get(currentPosition);
+        }
+
+        onPlayTrack(track);
+    }
+
+    private Track getRandomTrack() {
+        return mTrackAdapter.getTrackList().get(new Random().nextInt(mTrackAdapter.getItemCount()));
+    }
+
+    private void findTrackFiles() {
+        Uri trackUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+
+        String[] trackColumns = {
                 MediaStore.Audio.Media._ID,
                 MediaStore.Audio.Media.TITLE,
                 MediaStore.Audio.Media.ARTIST,
@@ -171,19 +219,19 @@ public class MainActivity extends AppCompatActivity
                 MediaStore.Audio.Media.DATA
         };
 
-        String audioConditions = MediaStore.Audio.Media.IS_MUSIC + "=1";
-        String audioOrder = MediaStore.Audio.Media.TITLE + " ASC";
+        String trackConditions = MediaStore.Audio.Media.IS_MUSIC + "=1";
+        String trackOrder = MediaStore.Audio.Media.TITLE + " ASC";
 
-        List<Audio> audioList = new ArrayList<>();
+        List<Track> trackList = new ArrayList<>();
 
-        Cursor audioCursor = getContentResolver().query(audioUri, audioColumns, audioConditions, null, audioOrder);
-        if (audioCursor != null) {
-            while (audioCursor.moveToNext()) {
-                audioList.add(new Audio(audioCursor));
+        Cursor trackCursor = getContentResolver().query(trackUri, trackColumns, trackConditions, null, trackOrder);
+        if (trackCursor != null) {
+            while (trackCursor.moveToNext()) {
+                trackList.add(new Track(trackCursor));
             }
-            audioCursor.close();
+            trackCursor.close();
         }
 
-        mAudioAdapter.setAudioList(audioList);
+        mTrackAdapter.setTrackList(trackList);
     }
 }

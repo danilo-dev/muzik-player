@@ -9,4 +9,5 @@
     <string name="cd_album_art">Capa do álbum</string>
     <string name="cd_btn_next_track">Próxima faixa</string>
     <string name="cd_btn_state_control">Play ou pause</string>
+    <string name="cd_btn_previous_track">Faixa anterior</string>
 </resources>

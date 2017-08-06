@@ -15,4 +15,12 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="ImageButtonControlPlayerBottom" parent="Base.Widget.AppCompat.Button.Borderless">
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:layout_width">@dimen/button_player_bottom_size</item>
+        <item name="android:layout_height">@dimen/button_player_bottom_size</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:theme">@style/ThemeOverlay.AppCompat.Dark</item>
+    </style>
+
 </resources>
