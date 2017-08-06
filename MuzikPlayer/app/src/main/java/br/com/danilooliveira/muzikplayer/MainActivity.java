@@ -1,9 +1,13 @@
 package br.com.danilooliveira.muzikplayer;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.database.Cursor;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -23,17 +27,17 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import br.com.danilooliveira.muzikplayer.adapters.TrackAdapter;
 import br.com.danilooliveira.muzikplayer.domain.Track;
 import br.com.danilooliveira.muzikplayer.interfaces.OnAdapterListener;
+import br.com.danilooliveira.muzikplayer.interfaces.OnMediaPlayerListener;
+import br.com.danilooliveira.muzikplayer.services.MediaPlayerService;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, OnMediaPlayerListener {
     private DrawerLayout mDrawerLayout;
     private View playerBottomControl;
     private ImageView imgAlbumArt;
@@ -41,11 +45,26 @@ public class MainActivity extends AppCompatActivity
     private TextView txtCurrentMediaArtist;
     private ImageButton btnPlayerBottomStateControl;
 
-    private MediaPlayer mediaPlayer;
+    private MediaPlayerService mediaPlayerService;
     private TrackAdapter mTrackAdapter;
 
-    private List<Track> trackHistoryList = new ArrayList<>();
-    private int currentPosition = 0;
+    private Intent mediaIntent;
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            MediaPlayerService.TrackBinder binder = (MediaPlayerService.TrackBinder) iBinder;
+
+            mediaPlayerService = binder.getService();
+            mediaPlayerService.setTrackList(mTrackAdapter.getTrackList());
+            mediaPlayerService.setListener(MainActivity.this);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,8 +84,6 @@ public class MainActivity extends AppCompatActivity
         RecyclerView recyclerView = (RecyclerView) findViewById(android.R.id.list);
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 
-        mediaPlayer = new MediaPlayer();
-
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.addDrawerListener(toggle);
@@ -78,19 +95,12 @@ public class MainActivity extends AppCompatActivity
         mTrackAdapter = new TrackAdapter(this, new OnAdapterListener() {
             @Override
             public void onTrackClick(Track track) {
-                currentPosition = 0;
-
-                if (!trackHistoryList.isEmpty()) {
-                    trackHistoryList.clear();
-                }
-
-                trackHistoryList.add(track);
-                onPlayTrack(track);
+                mediaPlayerService.resetHistoryList(track);
             }
 
             @Override
             public void onShuffleClick() {
-                onShuffle();
+                mediaPlayerService.onShuffle();
             }
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -101,29 +111,39 @@ public class MainActivity extends AppCompatActivity
         btnPlayerBottomStateControl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!mediaPlayer.isPlaying()) {
+                if (!mediaPlayerService.isPlaying()) {
                     btnPlayerBottomStateControl.setImageResource(R.drawable.ic_pause);
-                    mediaPlayer.start();
+                    mediaPlayerService.onPlay();
                 } else {
                     btnPlayerBottomStateControl.setImageResource(R.drawable.ic_play);
-                    mediaPlayer.pause();
+                    mediaPlayerService.onPause();
                 }
             }
         });
         btnPlayerBottomPrevious.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onPreviousTrack();
+                mediaPlayerService.onPreviousTrack();
             }
         });
         btnPlayerBottomNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onNextTrack();
+                mediaPlayerService.onNextTrack();
             }
         });
 
         findTrackFiles();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mediaIntent == null) {
+            mediaIntent = new Intent(this, MediaPlayerService.class);
+            bindService(mediaIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+            startService(mediaIntent);
+        }
     }
 
     @Override
@@ -148,80 +168,10 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void onPlayTrack(Track track) {
-        mediaPlayer.reset();
-        try {
-            mediaPlayer.setDataSource(track.getData());
-            mediaPlayer.prepare();
-            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mediaPlayer) {
-                    btnPlayerBottomStateControl.setImageResource(R.drawable.ic_play);
-                    onNextTrack();
-                }
-            });
-
-            if (track.getAlbumArt() != null) {
-                Picasso.with(this)
-                        .load(Uri.fromFile(new File(track.getAlbumArt())))
-                        .into(imgAlbumArt);
-            } else {
-                imgAlbumArt.setImageResource(R.drawable.ic_placeholder_album_small);
-            }
-            txtCurrentMediaTitle.setText(track.getTitle());
-            txtCurrentMediaArtist.setText(track.getArtist());
-            btnPlayerBottomStateControl.setImageResource(R.drawable.ic_pause);
-            playerBottomControl.setVisibility(View.VISIBLE);
-
-            mediaPlayer.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void onPreviousTrack() {
-        Track track;
-
-        currentPosition--;
-
-        if (currentPosition < 0) {
-            currentPosition = 0;
-            track = getRandomTrack();
-            trackHistoryList.add(0, track);
-        } else {
-            track = trackHistoryList.get(currentPosition);
-        }
-
-        onPlayTrack(track);
-    }
-
-    private void onNextTrack() {
-        Track track;
-
-        currentPosition++;
-
-        if (currentPosition >= trackHistoryList.size()) {
-            track = getRandomTrack();
-            trackHistoryList.add(track);
-        } else {
-            track = trackHistoryList.get(currentPosition);
-        }
-
-        onPlayTrack(track);
-    }
-
-    private void onShuffle() {
-        currentPosition = 0;
-        trackHistoryList.clear();
-
-        Track track = getRandomTrack();
-        trackHistoryList.add(track);
-
-        onPlayTrack(track);
-    }
-
-    private Track getRandomTrack() {
-        return mTrackAdapter.getTrackList().get(new Random().nextInt(mTrackAdapter.getItemCount()));
+    @Override
+    protected void onDestroy() {
+        stopService(mediaIntent);
+        super.onDestroy();
     }
 
     private void findTrackFiles() {
@@ -249,5 +199,30 @@ public class MainActivity extends AppCompatActivity
         }
 
         mTrackAdapter.setTrackList(trackList);
+    }
+
+    @Override
+    public void onTrackChanged(Track track) {
+        playerBottomControl.setVisibility(View.VISIBLE);
+        txtCurrentMediaTitle.setText(track.getTitle());
+        txtCurrentMediaArtist.setText(track.getArtist());
+
+        if (track.getAlbumArt() != null) {
+            Picasso.with(this)
+                    .load(Uri.fromFile(new File(track.getAlbumArt())))
+                    .into(imgAlbumArt);
+        } else {
+            imgAlbumArt.setImageResource(R.drawable.ic_placeholder_album_small);
+        }
+    }
+
+    @Override
+    public void onPauseTrack() {
+        btnPlayerBottomStateControl.setImageResource(R.drawable.ic_play);
+    }
+
+    @Override
+    public void onPlayTrack() {
+        btnPlayerBottomStateControl.setImageResource(R.drawable.ic_pause);
     }
 }
