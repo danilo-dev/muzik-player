@@ -108,6 +108,12 @@ public class MainActivity extends AppCompatActivity
 
         navigationView.setNavigationItemSelectedListener(this);
 
+        playerBottomControl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, PlayerActivity.class));
+            }
+        });
         btnPlayerBottomStateControl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -171,6 +177,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         stopService(mediaIntent);
+        unbindService(serviceConnection);
         super.onDestroy();
     }
 

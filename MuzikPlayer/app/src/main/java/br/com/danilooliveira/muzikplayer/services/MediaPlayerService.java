@@ -58,13 +58,6 @@ public class MediaPlayerService extends Service {
         return false;
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mediaPlayer.stop();
-        mediaPlayer.release();
-    }
-
     /**
      * Pausa uma faixa
      */

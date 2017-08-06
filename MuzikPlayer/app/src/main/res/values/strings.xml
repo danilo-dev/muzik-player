@@ -10,6 +10,8 @@
 
     <string name="cd_album_art">Capa do álbum</string>
     <string name="cd_btn_next_track">Próxima faixa</string>
-    <string name="cd_btn_state_control">Play ou pause</string>
     <string name="cd_btn_previous_track">Faixa anterior</string>
+    <string name="cd_btn_repeat">Repetir</string>
+    <string name="cd_btn_shuffle">Aleatório</string>
+    <string name="cd_btn_state_control">Play ou pause</string>
 </resources>
