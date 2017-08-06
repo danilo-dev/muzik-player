@@ -106,7 +106,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
                             @Override
                             public void run() {
                                 if (track.getAlbumArt() == null) {
-                                    picasso.load(R.drawable.ic_placeholder_album_small).into(imgAlbumArt);
+                                    imgAlbumArt.setImageResource(R.drawable.ic_placeholder_album_small);
                                 } else {
                                     picasso.load(Uri.fromFile(new File(track.getAlbumArt()))).into(imgAlbumArt);
                                 }

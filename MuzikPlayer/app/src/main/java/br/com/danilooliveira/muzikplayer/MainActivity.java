@@ -158,9 +158,7 @@ public class MainActivity extends AppCompatActivity
                         .load(Uri.fromFile(new File(track.getAlbumArt())))
                         .into(imgAlbumArt);
             } else {
-                Picasso.with(this)
-                        .load(R.drawable.ic_placeholder_album_small)
-                        .into(imgAlbumArt);
+                imgAlbumArt.setImageResource(R.drawable.ic_placeholder_album_small);
             }
             txtCurrentMediaTitle.setText(track.getTitle());
             txtCurrentMediaArtist.setText(track.getArtist());
