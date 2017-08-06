@@ -14,7 +14,7 @@
     android:paddingEnd="16dp"
     android:paddingRight="16dp"
     android:paddingBottom="8dp"
-
+    android:visibility="gone"
     tools:showIn="@layout/app_bar_main"
     >
     <ImageView
@@ -38,12 +38,20 @@
             android:textSize="16sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:maxLines="1"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
             />
         <TextView
             android:id="@+id/txt_current_track_artist"
             android:textColor="@color/text_player_bottom_primary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:maxLines="1"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
             />
     </LinearLayout>
     <ImageButton

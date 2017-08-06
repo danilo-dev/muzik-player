@@ -72,6 +72,9 @@ public class MainActivity extends AppCompatActivity
         mDrawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
+        txtCurrentMediaTitle.setSelected(true);
+        txtCurrentMediaArtist.setSelected(true);
+
         mTrackAdapter = new TrackAdapter(this, new OnTrackClickListener() {
             @Override
             public void onTrackClick(Track track) {
