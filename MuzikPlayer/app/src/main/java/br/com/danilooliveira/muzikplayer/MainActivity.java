@@ -30,7 +30,7 @@ import java.util.Random;
 
 import br.com.danilooliveira.muzikplayer.adapters.TrackAdapter;
 import br.com.danilooliveira.muzikplayer.domain.Track;
-import br.com.danilooliveira.muzikplayer.interfaces.OnTrackClickListener;
+import br.com.danilooliveira.muzikplayer.interfaces.OnAdapterListener;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity
         txtCurrentMediaTitle.setSelected(true);
         txtCurrentMediaArtist.setSelected(true);
 
-        mTrackAdapter = new TrackAdapter(this, new OnTrackClickListener() {
+        mTrackAdapter = new TrackAdapter(this, new OnAdapterListener() {
             @Override
             public void onTrackClick(Track track) {
                 currentPosition = 0;
@@ -86,6 +86,11 @@ public class MainActivity extends AppCompatActivity
 
                 trackHistoryList.add(track);
                 onPlayTrack(track);
+            }
+
+            @Override
+            public void onShuffleClick() {
+                onShuffle();
             }
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -201,6 +206,16 @@ public class MainActivity extends AppCompatActivity
         } else {
             track = trackHistoryList.get(currentPosition);
         }
+
+        onPlayTrack(track);
+    }
+
+    private void onShuffle() {
+        currentPosition = 0;
+        trackHistoryList.clear();
+
+        Track track = getRandomTrack();
+        trackHistoryList.add(track);
 
         onPlayTrack(track);
     }

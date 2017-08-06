@@ -5,6 +5,7 @@ import br.com.danilooliveira.muzikplayer.domain.Track;
 /**
  * Criado por Danilo de Oliveira (danilo.desenvolvedor@outlook.com) em 04/08/2017.
  */
-public interface OnTrackClickListener {
+public interface OnAdapterListener {
     void onTrackClick(Track track);
+    void onShuffleClick();
 }

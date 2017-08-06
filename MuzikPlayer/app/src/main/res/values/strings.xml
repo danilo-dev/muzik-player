@@ -4,6 +4,8 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
+    <string name="btn_shuffle">Aleatório</string>
+
     <string name="action_search">Pesquisar</string>
 
     <string name="cd_album_art">Capa do álbum</string>

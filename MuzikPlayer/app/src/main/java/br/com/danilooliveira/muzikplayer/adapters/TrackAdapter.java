@@ -19,20 +19,23 @@ import java.util.List;
 
 import br.com.danilooliveira.muzikplayer.R;
 import br.com.danilooliveira.muzikplayer.domain.Track;
-import br.com.danilooliveira.muzikplayer.interfaces.OnTrackClickListener;
+import br.com.danilooliveira.muzikplayer.interfaces.OnAdapterListener;
 
 /**
  * Criado por Danilo de Oliveira (danilo.desenvolvedor@outlook.com) em 04/08/2017.
  */
-public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHolder> {
-    private OnTrackClickListener audioClickListener;
+public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    private static final int TYPE_BUTTON = 0;
+    private static final int TYPE_TRACK = 1;
+
+    private OnAdapterListener audioClickListener;
     private LayoutInflater layoutInflater;
 
     private Context mContext;
     private List<Track> trackList;
     private Picasso picasso;
 
-    public TrackAdapter(Context context, OnTrackClickListener audioClickListener) {
+    public TrackAdapter(Context context, OnAdapterListener audioClickListener) {
         layoutInflater = LayoutInflater.from(context);
         mContext = context;
         this.audioClickListener = audioClickListener;
@@ -40,18 +43,33 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
     }
 
     @Override
-    public TrackViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new TrackViewHolder(layoutInflater.inflate(R.layout.adapter_track, parent, false));
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        switch (viewType) {
+            case TYPE_BUTTON:
+                return new ButtonViewHolder(layoutInflater.inflate(R.layout.adapter_item_shuffle, parent, false));
+
+            default:
+                return new TrackViewHolder(layoutInflater.inflate(R.layout.adapter_track, parent, false));
+        }
     }
 
     @Override
-    public void onBindViewHolder(TrackViewHolder holder, int position) {
-        holder.onBind(trackList.get(position));
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof ButtonViewHolder) {
+            ((ButtonViewHolder) holder).onBind();
+        } else if (holder instanceof TrackViewHolder) {
+            ((TrackViewHolder) holder).onBind(trackList.get(position));
+        }
     }
 
     @Override
     public int getItemCount() {
         return trackList != null ? trackList.size() : 0;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position == 0 ? TYPE_BUTTON : TYPE_TRACK;
     }
 
     public List<Track> getTrackList() {
@@ -63,7 +81,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
         notifyDataSetChanged();
     }
 
-    class TrackViewHolder extends RecyclerView.ViewHolder {
+    private class TrackViewHolder extends RecyclerView.ViewHolder {
         private ImageView imgAlbumArt;
         private TextView txtTitle;
         private TextView txtArtist;
@@ -121,6 +139,22 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
                 @Override
                 public void onClick(View view) {
                     audioClickListener.onTrackClick(track);
+                }
+            });
+        }
+    }
+
+    private class ButtonViewHolder extends RecyclerView.ViewHolder {
+
+        ButtonViewHolder(View itemView) {
+            super(itemView);
+        }
+
+        void onBind() {
+            this.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    audioClickListener.onShuffleClick();
                 }
             });
         }
