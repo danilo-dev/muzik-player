@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.annotation.Nullable;
 
 import java.io.IOException;
@@ -38,6 +39,12 @@ public class MediaPlayerService extends Service {
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        mediaPlayer.setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK);
+    }
+
+    @Override
     public IBinder onBind(Intent intent) {
         return trackBinder;
     }
@@ -49,6 +56,13 @@ public class MediaPlayerService extends Service {
         }
         mediaPlayer.release();
         return false;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mediaPlayer.stop();
+        mediaPlayer.release();
     }
 
     /**
