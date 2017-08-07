@@ -1,19 +1,16 @@
 package br.com.danilooliveira.muzikplayer;
 
-import android.content.ComponentName;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -33,11 +30,10 @@ import java.util.List;
 import br.com.danilooliveira.muzikplayer.adapters.TrackAdapter;
 import br.com.danilooliveira.muzikplayer.domain.Track;
 import br.com.danilooliveira.muzikplayer.interfaces.OnAdapterListener;
-import br.com.danilooliveira.muzikplayer.interfaces.OnMediaPlayerListener;
-import br.com.danilooliveira.muzikplayer.services.MediaPlayerService;
+import br.com.danilooliveira.muzikplayer.utils.Constants;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, OnMediaPlayerListener {
+public class MainActivity extends BaseActivity
+        implements NavigationView.OnNavigationItemSelectedListener {
     private DrawerLayout mDrawerLayout;
     private View playerBottomControl;
     private ImageView imgAlbumArt;
@@ -45,26 +41,7 @@ public class MainActivity extends AppCompatActivity
     private TextView txtCurrentMediaArtist;
     private ImageButton btnPlayerBottomStateControl;
 
-    private MediaPlayerService mediaPlayerService;
     private TrackAdapter mTrackAdapter;
-
-    private Intent mediaIntent;
-
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            MediaPlayerService.TrackBinder binder = (MediaPlayerService.TrackBinder) iBinder;
-
-            mediaPlayerService = binder.getService();
-            mediaPlayerService.setTrackList(mTrackAdapter.getTrackList());
-            mediaPlayerService.setListener(MainActivity.this);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,16 +120,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        if (mediaIntent == null) {
-            mediaIntent = new Intent(this, MediaPlayerService.class);
-            bindService(mediaIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-            startService(mediaIntent);
-        }
-    }
-
-    @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         mDrawerLayout.closeDrawer(GravityCompat.START, true);
         return true;
@@ -172,13 +139,6 @@ public class MainActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        stopService(mediaIntent);
-        unbindService(serviceConnection);
-        super.onDestroy();
     }
 
     private void findTrackFiles() {
@@ -209,27 +169,49 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onTrackChanged(Track track) {
-        playerBottomControl.setVisibility(View.VISIBLE);
-        txtCurrentMediaTitle.setText(track.getTitle());
-        txtCurrentMediaArtist.setText(track.getArtist());
+    public BroadcastReceiver onTrackChanged() {
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Track track = intent.getParcelableExtra(Constants.BUNDLE_TRACK);
 
-        if (track.getAlbumArt() != null) {
-            Picasso.with(this)
-                    .load(Uri.fromFile(new File(track.getAlbumArt())))
-                    .into(imgAlbumArt);
-        } else {
-            imgAlbumArt.setImageResource(R.drawable.ic_placeholder_album_small);
-        }
+                playerBottomControl.setVisibility(View.VISIBLE);
+                txtCurrentMediaTitle.setText(track.getTitle());
+                txtCurrentMediaArtist.setText(track.getArtist());
+
+                if (track.getAlbumArt() != null) {
+                    Picasso.with(context)
+                            .load(Uri.fromFile(new File(track.getAlbumArt())))
+                            .into(imgAlbumArt);
+                } else {
+                    imgAlbumArt.setImageResource(R.drawable.ic_placeholder_album_small);
+                }
+            }
+        };
     }
 
     @Override
-    public void onPauseTrack() {
-        btnPlayerBottomStateControl.setImageResource(R.drawable.ic_play);
+    public BroadcastReceiver onPauseTrack() {
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                btnPlayerBottomStateControl.setImageResource(R.drawable.ic_play);
+            }
+        };
     }
 
     @Override
-    public void onPlayTrack() {
-        btnPlayerBottomStateControl.setImageResource(R.drawable.ic_pause);
+    public BroadcastReceiver onPlayTrack() {
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                btnPlayerBottomStateControl.setImageResource(R.drawable.ic_pause);
+            }
+        };
+    }
+
+    @Override
+    protected void onServiceConnected() {
+        mediaPlayerService.setTrackList(mTrackAdapter.getTrackList());
     }
 }

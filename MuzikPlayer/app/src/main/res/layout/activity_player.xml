@@ -17,11 +17,14 @@
         />
     <TextView
         android:id="@+id/txt_title"
-        android:text="All I Can Think About Is You"
         android:textSize="20sp"
         android:textColor="@color/text_primary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
         android:gravity="center_horizontal"
         android:maxLines="1"
         android:singleLine="true"
@@ -31,11 +34,14 @@
         />
     <TextView
         android:id="@+id/txt_artist"
-        android:text="Coldplay"
         android:textSize="16sp"
         android:textColor="@color/text_primary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
         android:gravity="center_horizontal"
         android:maxLines="1"
         android:singleLine="true"
@@ -51,7 +57,7 @@
         >
         <TextView
             android:id="@+id/txt_current_duration"
-            android:text="2:10"
+            android:text="00:00"
             android:textColor="@color/colorPrimary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -62,7 +68,6 @@
 
         <TextView
             android:id="@+id/txt_total_duration"
-            android:text="4:31"
             android:textColor="@color/text_primary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -78,8 +83,6 @@
             android:progressBackgroundTint="@color/colorAccent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:progress="54"
-            android:max="100"
             android:layout_marginTop="8dp"
             android:layout_marginStart="16dp"
             android:layout_marginLeft="16dp"
@@ -103,7 +106,7 @@
             android:weightSum="5"
             >
             <ImageButton
-                android:id="@+id/btn_suffle"
+                android:id="@+id/btn_shuffle"
                 android:contentDescription="@string/cd_btn_shuffle"
                 android:layout_weight="1"
                 android:src="@drawable/ic_shuffle_normal"

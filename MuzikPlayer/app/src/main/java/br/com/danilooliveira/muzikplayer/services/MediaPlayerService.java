@@ -7,22 +7,25 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 import br.com.danilooliveira.muzikplayer.domain.Track;
-import br.com.danilooliveira.muzikplayer.interfaces.OnMediaPlayerListener;
+import br.com.danilooliveira.muzikplayer.utils.Constants;
 
 public class MediaPlayerService extends Service {
-    private OnMediaPlayerListener listener;
     private IBinder trackBinder = new TrackBinder();
 
     private MediaPlayer mediaPlayer;
 
     private Random random;
+    private SimpleDateFormat dateFormatter;
 
     private List<Track> mTrackList;
     private List<Track> trackHistoryList;
@@ -32,6 +35,7 @@ public class MediaPlayerService extends Service {
         mediaPlayer = new MediaPlayer();
 
         random = new Random();
+        dateFormatter = new SimpleDateFormat("mm:ss", Locale.getDefault());
 
         mTrackList = new ArrayList<>();
         trackHistoryList = new ArrayList<>();
@@ -63,7 +67,7 @@ public class MediaPlayerService extends Service {
      */
     public void onPause() {
         mediaPlayer.pause();
-        listener.onPauseTrack();
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PAUSE));
     }
 
     /**
@@ -71,7 +75,7 @@ public class MediaPlayerService extends Service {
      */
     public void onPlay() {
         mediaPlayer.start();
-        listener.onPlayTrack();
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PLAY));
     }
 
     /**
@@ -90,7 +94,9 @@ public class MediaPlayerService extends Service {
                 }
             });
 
-            listener.onTrackChanged(track);
+            Intent i = new Intent(Constants.ACTION_TRACK_CHANGED);
+            i.putExtra(Constants.BUNDLE_TRACK, track);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(i);
 
             mediaPlayer.start();
         } catch (IOException e) {
@@ -168,16 +174,28 @@ public class MediaPlayerService extends Service {
         }
     }
 
+    public Track getCurrentTrack() {
+        return trackHistoryList.get(currentPosition);
+    }
+
     public boolean isPlaying() {
         return mediaPlayer.isPlaying();
     }
 
-    public void setTrackList(List<Track> trackList) {
-        mTrackList = trackList;
+    public String getCurrentDuration() {
+        return dateFormatter.format(mediaPlayer.getCurrentPosition());
     }
 
-    public void setListener(OnMediaPlayerListener listener) {
-        this.listener = listener;
+    public String getTotalDuration() {
+        return dateFormatter.format(mediaPlayer.getDuration());
+    }
+
+    public MediaPlayer getMediaPlayer() {
+        return mediaPlayer;
+    }
+
+    public void setTrackList(List<Track> trackList) {
+        mTrackList = trackList;
     }
 
     private Track getRandomTrack() {
