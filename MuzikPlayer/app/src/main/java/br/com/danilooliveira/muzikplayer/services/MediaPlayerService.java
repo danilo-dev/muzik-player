@@ -11,10 +11,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Random;
 
 import br.com.danilooliveira.muzikplayer.domain.Track;
@@ -26,7 +24,6 @@ public class MediaPlayerService extends Service {
     private MediaPlayer mediaPlayer;
 
     private Random random;
-    private SimpleDateFormat timeFormatter;
 
     private List<Track> mTrackList;
     private List<Track> trackHistoryList;
@@ -40,7 +37,6 @@ public class MediaPlayerService extends Service {
         mediaPlayer = new MediaPlayer();
 
         random = new Random();
-        timeFormatter = new SimpleDateFormat("mm:ss", Locale.getDefault());
 
         mTrackList = new ArrayList<>();
         trackHistoryList = new ArrayList<>();
@@ -73,7 +69,7 @@ public class MediaPlayerService extends Service {
     /**
      * Pausa uma faixa
      */
-    public void onPause() {
+    public void pause() {
         mediaPlayer.pause();
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PAUSE));
     }
@@ -81,7 +77,7 @@ public class MediaPlayerService extends Service {
     /**
      * Dá play em uma faixa que já esteja em execução
      */
-    public void onPlay() {
+    public void play() {
         mediaPlayer.start();
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PLAY));
     }
@@ -189,6 +185,10 @@ public class MediaPlayerService extends Service {
         playTrack(track);
     }
 
+    public void setCurrentDuration(int duration) {
+        mediaPlayer.seekTo(duration);
+    }
+
     /**
      * Habilita/desabilita o modo aleatório
      * @return  true se o aleatório tiver sido ativado
@@ -274,16 +274,16 @@ public class MediaPlayerService extends Service {
      * Retorna a duração formatada já reproduzida da faixa
      * @return  String
      */
-    public String getCurrentDuration() {
-        return timeFormatter.format(mediaPlayer.getCurrentPosition());
+    public int getCurrentDuration() {
+        return mediaPlayer.getCurrentPosition();
     }
 
     /**
      * Retorna a duração total formatada da faixa que está tocando
      * @return  String
      */
-    public String getTotalDuration() {
-        return timeFormatter.format(mediaPlayer.getDuration());
+    public int getTotalDuration() {
+        return mediaPlayer.getDuration();
     }
 
     public MediaPlayer getMediaPlayer() {

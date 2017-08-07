@@ -15,6 +15,8 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -30,6 +32,7 @@ public class PlayerActivity extends BaseActivity {
     private SeekBar seekTrackIndicator;
     private ImageButton btnShuffle, btnStateControl, btnRepeat;
 
+    private SimpleDateFormat timeFormatter = new SimpleDateFormat("mm:ss", Locale.getDefault());
     private Timer timer = new Timer();
 
     @Override
@@ -50,13 +53,34 @@ public class PlayerActivity extends BaseActivity {
         txtTitle.setSelected(true);
         txtArtist.setSelected(true);
 
+        seekTrackIndicator.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            private boolean wasPlaying;
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                txtCurrentDuration.setText(timeFormatter.format(i));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                wasPlaying = mediaPlayerService.isPlaying();
+                mediaPlayerService.pause();
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                mediaPlayerService.setCurrentDuration(seekBar.getProgress());
+                if (wasPlaying) {
+                    mediaPlayerService.play();
+                }
+            }
+        });
         btnStateControl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (mediaPlayerService.isPlaying()) {
-                    mediaPlayerService.onPause();
+                    mediaPlayerService.pause();
                 } else {
-                    mediaPlayerService.onPlay();
+                    mediaPlayerService.play();
                 }
             }
         });
@@ -91,9 +115,8 @@ public class PlayerActivity extends BaseActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if (mediaPlayerService != null) {
-                            txtCurrentDuration.setText(mediaPlayerService.getCurrentDuration());
-                            seekTrackIndicator.setProgress(mediaPlayerService.getMediaPlayer().getCurrentPosition());
+                        if (mediaPlayerService != null && mediaPlayerService.isPlaying()) {
+                            updateDurationInfo();
                         }
                     }
                 });
@@ -135,8 +158,13 @@ public class PlayerActivity extends BaseActivity {
             imgAlbumArt.setImageResource(R.drawable.ic_placeholder_album_large);
         }
 
-        txtTotalDuration.setText(mediaPlayerService.getTotalDuration());
+        txtTotalDuration.setText(timeFormatter.format(mediaPlayerService.getTotalDuration()));
         seekTrackIndicator.setMax(mediaPlayerService.getMediaPlayer().getDuration());
+    }
+
+    private void updateDurationInfo() {
+        txtCurrentDuration.setText(timeFormatter.format(mediaPlayerService.getCurrentDuration()));
+        seekTrackIndicator.setProgress(mediaPlayerService.getMediaPlayer().getCurrentPosition());
     }
 
     @Override
@@ -173,6 +201,7 @@ public class PlayerActivity extends BaseActivity {
     protected void onServiceConnected() {
         btnStateControl.setImageResource(mediaPlayerService.isPlaying()? R.drawable.ic_pause_circle : R.drawable.ic_play_circle);
         updateTrackInfo(mediaPlayerService.getCurrentTrack());
+        updateDurationInfo();
         changeShuffle(mediaPlayerService.isShuffle());
         changeRepeat(mediaPlayerService.getRepeatType());
     }

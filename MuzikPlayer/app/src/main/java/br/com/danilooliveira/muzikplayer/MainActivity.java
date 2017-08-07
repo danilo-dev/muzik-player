@@ -96,10 +96,10 @@ public class MainActivity extends BaseActivity
             public void onClick(View view) {
                 if (!mediaPlayerService.isPlaying()) {
                     btnPlayerBottomStateControl.setImageResource(R.drawable.ic_pause);
-                    mediaPlayerService.onPlay();
+                    mediaPlayerService.play();
                 } else {
                     btnPlayerBottomStateControl.setImageResource(R.drawable.ic_play);
-                    mediaPlayerService.onPause();
+                    mediaPlayerService.pause();
                 }
             }
         });
