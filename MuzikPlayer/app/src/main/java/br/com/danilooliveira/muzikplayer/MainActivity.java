@@ -77,7 +77,7 @@ public class MainActivity extends BaseActivity
 
             @Override
             public void onShuffleClick() {
-                mediaPlayerService.onShuffle();
+                mediaPlayerService.playShuffle();
             }
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -106,13 +106,13 @@ public class MainActivity extends BaseActivity
         btnPlayerBottomPrevious.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mediaPlayerService.onPreviousTrack();
+                mediaPlayerService.playPreviousTrack();
             }
         });
         btnPlayerBottomNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mediaPlayerService.onNextTrack();
+                mediaPlayerService.playNextTrack();
             }
         });
 

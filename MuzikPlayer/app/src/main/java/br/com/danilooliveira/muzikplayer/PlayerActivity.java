@@ -59,13 +59,19 @@ public class PlayerActivity extends BaseActivity {
         findViewById(R.id.btn_previous).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mediaPlayerService.onPreviousTrack();
+                mediaPlayerService.playPreviousTrack();
             }
         });
         findViewById(R.id.btn_next).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mediaPlayerService.onNextTrack();
+                mediaPlayerService.playNextTrack();
+            }
+        });
+        btnShuffle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onShuffleChanged(mediaPlayerService.changeShuffleState());
             }
         });
 
@@ -85,18 +91,28 @@ public class PlayerActivity extends BaseActivity {
         }, 0, 17);
     }
 
+    private void onShuffleChanged(boolean isShuffle) {
+        if (isShuffle) {
+            btnShuffle.setImageResource(R.drawable.ic_shuffle_active);
+        } else {
+            btnShuffle.setImageResource(R.drawable.ic_shuffle_normal);
+        }
+    }
+
+    private void updateTrackInfo(Track track) {
+        txtTitle.setText(track.getTitle());
+        txtArtist.setText(track.getArtist());
+
+        txtTotalDuration.setText(mediaPlayerService.getTotalDuration());
+        seekTrackIndicator.setMax(mediaPlayerService.getMediaPlayer().getDuration());
+    }
+
     @Override
     protected BroadcastReceiver onTrackChanged() {
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Track track = intent.getParcelableExtra(Constants.BUNDLE_TRACK);
-
-                txtTitle.setText(track.getTitle());
-                txtArtist.setText(track.getArtist());
-
-                txtTotalDuration.setText(mediaPlayerService.getTotalDuration());
-                seekTrackIndicator.setMax(mediaPlayerService.getMediaPlayer().getDuration());
+                updateTrackInfo((Track) intent.getParcelableExtra(Constants.BUNDLE_TRACK));
             }
         };
     }
@@ -123,12 +139,7 @@ public class PlayerActivity extends BaseActivity {
 
     @Override
     protected void onServiceConnected() {
-        Track track = mediaPlayerService.getCurrentTrack();
-
-        txtTitle.setText(track.getTitle());
-        txtArtist.setText(track.getArtist());
-
-        txtTotalDuration.setText(mediaPlayerService.getTotalDuration());
-        seekTrackIndicator.setMax(mediaPlayerService.getMediaPlayer().getDuration());
+        updateTrackInfo(mediaPlayerService.getCurrentTrack());
+        onShuffleChanged(mediaPlayerService.isShuffle());
     }
 }

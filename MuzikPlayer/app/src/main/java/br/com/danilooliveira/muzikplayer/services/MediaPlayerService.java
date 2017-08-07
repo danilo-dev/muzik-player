@@ -25,21 +25,23 @@ public class MediaPlayerService extends Service {
     private MediaPlayer mediaPlayer;
 
     private Random random;
-    private SimpleDateFormat dateFormatter;
+    private SimpleDateFormat timeFormatter;
 
     private List<Track> mTrackList;
     private List<Track> trackHistoryList;
     private int currentPosition;
+    private boolean isShuffle;
 
     public MediaPlayerService() {
         mediaPlayer = new MediaPlayer();
 
         random = new Random();
-        dateFormatter = new SimpleDateFormat("mm:ss", Locale.getDefault());
+        timeFormatter = new SimpleDateFormat("mm:ss", Locale.getDefault());
 
         mTrackList = new ArrayList<>();
         trackHistoryList = new ArrayList<>();
         currentPosition = 0;
+        isShuffle = true;
     }
 
     @Override
@@ -82,7 +84,7 @@ public class MediaPlayerService extends Service {
      * Reproduz uma nova faixa
      * @param track Faixa a ser reproduzida
      */
-    public void onPlayTrack(Track track) {
+    public void playTrack(Track track) {
         mediaPlayer.reset();
         try {
             mediaPlayer.setDataSource(track.getData());
@@ -90,7 +92,7 @@ public class MediaPlayerService extends Service {
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mediaPlayer) {
-                    onNextTrack();
+                    playNextTrack();
                 }
             });
 
@@ -101,7 +103,7 @@ public class MediaPlayerService extends Service {
             mediaPlayer.start();
         } catch (IOException e) {
             e.printStackTrace();
-            onNextTrack();
+            playNextTrack();
         }
     }
 
@@ -110,20 +112,24 @@ public class MediaPlayerService extends Service {
      * Se houver faixas no histórico, é reproduzida
      * Senão, reproduz uma nova faixa e a adiciona ao histórico
      */
-    public void onPreviousTrack() {
+    public void playPreviousTrack() {
         Track track;
 
         currentPosition--;
 
-        if (currentPosition < 0) {
-            currentPosition = 0;
-            track = getRandomTrack();
-            trackHistoryList.add(0, track);
+        if (isShuffle) {
+            if (currentPosition < 0) {
+                currentPosition = 0;
+                track = getRandomTrack();
+                trackHistoryList.add(0, track);
+            } else {
+                track = trackHistoryList.get(currentPosition);
+            }
         } else {
-            track = trackHistoryList.get(currentPosition);
+            track = mTrackList.get(currentPosition);
         }
 
-        onPlayTrack(track);
+        playTrack(track);
     }
 
     /**
@@ -131,32 +137,54 @@ public class MediaPlayerService extends Service {
      * Se houver faixas no histórico relativa a posição, é reproduzida
      * Senão, reproduz uma nova faixa e a adiciona ao histórico
      */
-    public void onNextTrack() {
+    public void playNextTrack() {
         Track track;
 
         currentPosition++;
 
-        if (currentPosition >= trackHistoryList.size()) {
-            track = getRandomTrack();
-            trackHistoryList.add(track);
+        if (isShuffle) {
+            if (currentPosition >= trackHistoryList.size()) {
+                track = getRandomTrack();
+                trackHistoryList.add(track);
+            } else {
+                track = trackHistoryList.get(currentPosition);
+            }
         } else {
-            track = trackHistoryList.get(currentPosition);
+            track = mTrackList.get(currentPosition);
         }
 
-        onPlayTrack(track);
+        playTrack(track);
     }
 
     /**
      * Reproduz faixas aleatoriamente
      */
-    public void onShuffle() {
+    public void playShuffle() {
         currentPosition = 0;
         trackHistoryList.clear();
 
         Track track = getRandomTrack();
         trackHistoryList.add(track);
 
-        onPlayTrack(track);
+        playTrack(track);
+    }
+
+    /**
+     * Habilita/desabilita o modo aleatório
+     * @return  true se o aleatório tiver sido ativado
+     */
+    public boolean changeShuffleState() {
+        isShuffle = !isShuffle;
+
+        if (isShuffle) {
+            trackHistoryList.add(mTrackList.get(currentPosition));
+            currentPosition = 0;
+        } else {
+            currentPosition = mTrackList.indexOf(trackHistoryList.get(currentPosition));
+            trackHistoryList.clear();
+        }
+
+        return isShuffle;
     }
 
     /**
@@ -169,25 +197,57 @@ public class MediaPlayerService extends Service {
         trackHistoryList.clear();
 
         if (track != null) {
-            trackHistoryList.add(track);
-            onPlayTrack(track);
+            if (isShuffle) {
+                trackHistoryList.add(track);
+            } else {
+                currentPosition = mTrackList.indexOf(track);
+            }
+            playTrack(track);
         }
     }
 
+    /**
+     * Recupera a faixa atual
+     * @return  Faixa
+     */
     public Track getCurrentTrack() {
-        return trackHistoryList.get(currentPosition);
+        if (isShuffle) {
+            return trackHistoryList.get(currentPosition);
+        } else {
+            return mTrackList.get(currentPosition);
+        }
     }
 
+    /**
+     * Retorna se há alguma música tocando
+     * @return  true se estiver tocando
+     */
     public boolean isPlaying() {
         return mediaPlayer.isPlaying();
     }
 
-    public String getCurrentDuration() {
-        return dateFormatter.format(mediaPlayer.getCurrentPosition());
+    /**
+     * Retorna se o modo aleatório está ativado
+     * @return  true se o aleatório estiver ativado
+     */
+    public boolean isShuffle() {
+        return isShuffle;
     }
 
+    /**
+     * Retorna a duração formatada já reproduzida da faixa
+     * @return  String
+     */
+    public String getCurrentDuration() {
+        return timeFormatter.format(mediaPlayer.getCurrentPosition());
+    }
+
+    /**
+     * Retorna a duração total formatada da faixa que está tocando
+     * @return  String
+     */
     public String getTotalDuration() {
-        return dateFormatter.format(mediaPlayer.getDuration());
+        return timeFormatter.format(mediaPlayer.getDuration());
     }
 
     public MediaPlayer getMediaPlayer() {
@@ -198,6 +258,10 @@ public class MediaPlayerService extends Service {
         mTrackList = trackList;
     }
 
+    /**
+     * Obtém uma faixa aleatória da lista
+     * @return  Faixa
+     */
     private Track getRandomTrack() {
         return mTrackList.get(random.nextInt(mTrackList.size()));
     }
