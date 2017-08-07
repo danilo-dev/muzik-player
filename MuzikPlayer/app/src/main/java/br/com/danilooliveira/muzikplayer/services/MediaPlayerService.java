@@ -31,6 +31,7 @@ public class MediaPlayerService extends Service {
     private List<Track> trackHistoryList;
     private int currentPosition;
     private boolean isShuffle;
+    private int repeatType;
 
     public MediaPlayerService() {
         mediaPlayer = new MediaPlayer();
@@ -42,6 +43,7 @@ public class MediaPlayerService extends Service {
         trackHistoryList = new ArrayList<>();
         currentPosition = 0;
         isShuffle = true;
+        repeatType = Constants.TYPE_REPEAT_ALL;
     }
 
     @Override
@@ -84,7 +86,7 @@ public class MediaPlayerService extends Service {
      * Reproduz uma nova faixa
      * @param track Faixa a ser reproduzida
      */
-    public void playTrack(Track track) {
+    public void playTrack(final Track track) {
         mediaPlayer.reset();
         try {
             mediaPlayer.setDataSource(track.getData());
@@ -92,7 +94,20 @@ public class MediaPlayerService extends Service {
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mediaPlayer) {
-                    playNextTrack();
+                    switch (repeatType) {
+                        case Constants.TYPE_NO_REPEAT:
+                            // TODO: Implementar parada de execução
+                            playNextTrack();
+                            break;
+
+                        case Constants.TYPE_REPEAT_CURRENT:
+                            playTrack(track);
+                            break;
+
+                        case Constants.TYPE_REPEAT_ALL:
+                            playNextTrack();
+                            break;
+                    }
                 }
             });
 
@@ -187,6 +202,14 @@ public class MediaPlayerService extends Service {
         return isShuffle;
     }
 
+    public int changeRepeatType() {
+        if (--repeatType < Constants.TYPE_NO_REPEAT) {
+            repeatType = Constants.TYPE_REPEAT_ALL;
+        }
+
+        return repeatType;
+    }
+
     /**
      * Limpa o histórico de faixas
      * Reproduz uma nova faixa, se não for null
@@ -232,6 +255,10 @@ public class MediaPlayerService extends Service {
      */
     public boolean isShuffle() {
         return isShuffle;
+    }
+
+    public int getRepeatType() {
+        return repeatType;
     }
 
     /**

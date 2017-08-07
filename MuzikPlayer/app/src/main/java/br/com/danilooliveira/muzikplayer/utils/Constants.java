@@ -9,4 +9,8 @@ public interface Constants {
     String ACTION_PLAY = "br.com.danilooliveira.muzikplayer.intent.ACTION_PLAY";
 
     String BUNDLE_TRACK = "track";
+
+    int TYPE_NO_REPEAT = 0;
+    int TYPE_REPEAT_CURRENT = 1;
+    int TYPE_REPEAT_ALL = 2;
 }
