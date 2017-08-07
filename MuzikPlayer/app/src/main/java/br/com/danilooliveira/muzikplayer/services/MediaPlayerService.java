@@ -6,6 +6,7 @@ import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.support.annotation.IntRange;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -29,8 +30,10 @@ public class MediaPlayerService extends Service {
 
     private List<Track> mTrackList;
     private List<Track> trackHistoryList;
+    private int remainTracks;
     private int currentPosition;
     private boolean isShuffle;
+    @IntRange(from = Constants.TYPE_NO_REPEAT, to = Constants.TYPE_REPEAT_ALL)
     private int repeatType;
 
     public MediaPlayerService() {
@@ -41,6 +44,7 @@ public class MediaPlayerService extends Service {
 
         mTrackList = new ArrayList<>();
         trackHistoryList = new ArrayList<>();
+        remainTracks = 0;
         currentPosition = 0;
         isShuffle = true;
         repeatType = Constants.TYPE_REPEAT_ALL;
@@ -96,8 +100,9 @@ public class MediaPlayerService extends Service {
                 public void onCompletion(MediaPlayer mediaPlayer) {
                     switch (repeatType) {
                         case Constants.TYPE_NO_REPEAT:
-                            // TODO: Implementar parada de execução
-                            playNextTrack();
+                            if (--remainTracks > 0) {
+                                playNextTrack();
+                            }
                             break;
 
                         case Constants.TYPE_REPEAT_CURRENT:
@@ -207,6 +212,10 @@ public class MediaPlayerService extends Service {
             repeatType = Constants.TYPE_REPEAT_ALL;
         }
 
+        if (repeatType == Constants.TYPE_NO_REPEAT) {
+            remainTracks = mTrackList.size();
+        }
+
         return repeatType;
     }
 
@@ -283,6 +292,9 @@ public class MediaPlayerService extends Service {
 
     public void setTrackList(List<Track> trackList) {
         mTrackList = trackList;
+        if (repeatType == Constants.TYPE_NO_REPEAT) {
+            remainTracks = trackList.size();
+        }
     }
 
     /**
