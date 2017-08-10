@@ -1,26 +1,39 @@
 package br.com.danilooliveira.muzikplayer.services;
 
-import android.app.Service;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.IntRange;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaBrowserServiceCompat;
+import android.support.v4.media.session.MediaButtonReceiver;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v7.app.NotificationCompat;
+import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import br.com.danilooliveira.muzikplayer.R;
 import br.com.danilooliveira.muzikplayer.domain.Track;
 import br.com.danilooliveira.muzikplayer.utils.Constants;
 
-public class MediaPlayerService extends Service {
+public class MediaPlayerService extends MediaBrowserServiceCompat {
     private IBinder trackBinder = new TrackBinder();
 
+    private MediaSessionCompat mediaSession;
+    private PlaybackStateCompat.Builder playbackStateBuilder;
     private MediaPlayer mediaPlayer;
 
     private Random random;
@@ -34,8 +47,6 @@ public class MediaPlayerService extends Service {
     private int repeatType;
 
     public MediaPlayerService() {
-        mediaPlayer = new MediaPlayer();
-
         random = new Random();
 
         mTrackList = new ArrayList<>();
@@ -49,12 +60,48 @@ public class MediaPlayerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        mediaSession = new MediaSessionCompat(this, MediaPlayerService.class.getSimpleName());
+        mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
+                | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+
+        playbackStateBuilder = new PlaybackStateCompat.Builder()
+                .setActions(PlaybackStateCompat.ACTION_PLAY);
+
+        mediaSession.setActive(true);
+        mediaSession.setPlaybackState(playbackStateBuilder.build());
+        mediaSession.setCallback(new MediaSessionCompat.Callback() {
+            @Override
+            public void onPlay() {
+                super.onPlay();
+                if (mediaPlayer.isPlaying()) {
+                    pause();
+                } else {
+                    play();
+                }
+            }
+        });
+
+        setSessionToken(mediaSession.getSessionToken());
+
+        mediaPlayer = new MediaPlayer();
         mediaPlayer.setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK);
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         return trackBinder;
+    }
+
+    @Nullable
+    @Override
+    public BrowserRoot onGetRoot(@NonNull String clientPackageName, int clientUid, @Nullable Bundle rootHints) {
+        return new BrowserRoot("abc", null);
+    }
+
+    @Override
+    public void onLoadChildren(@NonNull String parentId, @NonNull Result<List<MediaBrowserCompat.MediaItem>> result) {
+        List<MediaBrowserCompat.MediaItem> mediaItemList = new ArrayList<>();
+        result.sendResult(mediaItemList);
     }
 
     @Override
@@ -115,6 +162,30 @@ public class MediaPlayerService extends Service {
             Intent i = new Intent(Constants.ACTION_TRACK_CHANGED);
             i.putExtra(Constants.BUNDLE_TRACK, track);
             LocalBroadcastManager.getInstance(this).sendBroadcast(i);
+
+            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
+            notificationBuilder
+                    .setContentTitle(track.getTitle())
+                    .setContentText(track.getArtist())
+                    .setLargeIcon(BitmapFactory.decodeFile(track.getAlbumArt()))
+
+                    .setContentIntent(mediaSession.getController().getSessionActivity())
+                    .setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_STOP))
+
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .setSmallIcon(R.drawable.ic_logo)
+                    .setColor(ContextCompat.getColor(this, R.color.background_primary))
+
+                    .addAction(new NotificationCompat.Action(
+                            R.drawable.ic_pause, getString(R.string.btn_pause),
+                            MediaButtonReceiver.buildMediaButtonPendingIntent(this,
+                                    PlaybackStateCompat.ACTION_PLAY_PAUSE)))
+
+                    .setStyle(new NotificationCompat.MediaStyle()
+                            .setMediaSession(mediaSession.getSessionToken())
+                            .setShowActionsInCompactView(0));
+
+            startForeground(10, notificationBuilder.build());
 
             mediaPlayer.start();
         } catch (IOException e) {
