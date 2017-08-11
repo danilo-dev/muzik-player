@@ -1,7 +1,6 @@
 package br.com.danilooliveira.muzikplayer.services;
 
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Bundle;
@@ -10,23 +9,19 @@ import android.os.PowerManager;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaBrowserServiceCompat;
-import android.support.v4.media.session.MediaButtonReceiver;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.support.v7.app.NotificationCompat;
-import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import br.com.danilooliveira.muzikplayer.R;
 import br.com.danilooliveira.muzikplayer.domain.Track;
+import br.com.danilooliveira.muzikplayer.utils.AppPreferences;
 import br.com.danilooliveira.muzikplayer.utils.Constants;
 
 public class MediaPlayerService extends MediaBrowserServiceCompat {
@@ -38,24 +33,21 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
     private Random random;
 
+    /**
+     * Lista com todas as faixas
+     */
     private List<Track> mTrackList;
+
+    /**
+     * Histórico das faixas reproduzidas
+     */
     private List<Track> trackHistoryList;
-    private int remainTracks;
+    @Deprecated
+    private int remainTracks; // TODO: Substituir implementação de contador
     private int currentPosition;
     private boolean isShuffle;
     @IntRange(from = Constants.TYPE_NO_REPEAT, to = Constants.TYPE_REPEAT_ALL)
     private int repeatType;
-
-    public MediaPlayerService() {
-        random = new Random();
-
-        mTrackList = new ArrayList<>();
-        trackHistoryList = new ArrayList<>();
-        remainTracks = 0;
-        currentPosition = 0;
-        isShuffle = true;
-        repeatType = Constants.TYPE_REPEAT_ALL;
-    }
 
     @Override
     public void onCreate() {
@@ -73,6 +65,10 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             @Override
             public void onPlay() {
                 super.onPlay();
+                // TODO: Corrigir implementação do click dos botões de headset
+                if (mediaPlayer == null || mTrackList == null || mTrackList.isEmpty()) {
+                    return;
+                }
                 if (mediaPlayer.isPlaying()) {
                     pause();
                 } else {
@@ -85,6 +81,15 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
         mediaPlayer = new MediaPlayer();
         mediaPlayer.setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK);
+
+        random = new Random();
+
+        mTrackList = new ArrayList<>();
+        trackHistoryList = new ArrayList<>();
+        remainTracks = 0;
+        currentPosition = 0;
+        isShuffle = AppPreferences.with(this).isShuffleEnabled();
+        repeatType = AppPreferences.with(this).getRepeatType();
     }
 
     @Override
@@ -163,7 +168,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             i.putExtra(Constants.BUNDLE_TRACK, track);
             LocalBroadcastManager.getInstance(this).sendBroadcast(i);
 
-            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
+            /*NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
             notificationBuilder
                     .setContentTitle(track.getTitle())
                     .setContentText(track.getArtist())
@@ -185,7 +190,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                             .setMediaSession(mediaSession.getSessionToken())
                             .setShowActionsInCompactView(0));
 
-            startForeground(10, notificationBuilder.build());
+            startForeground(10, notificationBuilder.build());*/
 
             mediaPlayer.start();
         } catch (IOException e) {
@@ -275,6 +280,8 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             trackHistoryList.clear();
         }
 
+        AppPreferences.with(this).setShuffleEnabled(isShuffle);
+
         return isShuffle;
     }
 
@@ -286,6 +293,8 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         if (repeatType == Constants.TYPE_NO_REPEAT) {
             remainTracks = mTrackList.size();
         }
+
+        AppPreferences.with(this).setRepeatType(repeatType);
 
         return repeatType;
     }

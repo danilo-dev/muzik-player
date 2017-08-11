@@ -141,6 +141,10 @@ public class MainActivity extends BaseActivity
         }
     }
 
+    /**
+     * TODO: Implementar forma melhor e assíncrona para recuperação das faixas
+     */
+    @Deprecated
     private void findTrackFiles() {
         Uri trackUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
 
