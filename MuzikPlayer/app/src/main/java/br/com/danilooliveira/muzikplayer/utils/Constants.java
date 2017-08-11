@@ -10,6 +10,8 @@ public interface Constants {
 
     String BUNDLE_TRACK = "track";
 
+    int REQUEST_PERMISSION_STORAGE = 1;
+
     int TYPE_NO_REPEAT = 0;
     int TYPE_REPEAT_CURRENT = 1;
     int TYPE_REPEAT_ALL = 2;

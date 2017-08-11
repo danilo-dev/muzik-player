@@ -1,16 +1,22 @@
 package br.com.danilooliveira.muzikplayer;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -133,6 +139,25 @@ public class MainActivity extends BaseActivity
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case Constants.REQUEST_PERMISSION_STORAGE:
+                boolean granted = grantResults.length > 0;
+                for (int result : grantResults) {
+                    if (result == PackageManager.PERMISSION_DENIED) {
+                        granted = false;
+                    }
+                }
+
+                if (granted) {
+                    findTrackFiles();
+                }
+                break;
+        }
+    }
+
+    @Override
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             mDrawerLayout.closeDrawer(GravityCompat.START);
@@ -141,11 +166,47 @@ public class MainActivity extends BaseActivity
         }
     }
 
+    private boolean checkStoragePermissions() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        } else {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                    || ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+                dialog.setTitle(R.string.dialog_permission_storage_title);
+                dialog.setMessage(R.string.dialog_permission_storage_message);
+                dialog.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        requestStoragePermissions();
+                    }
+                });
+                dialog.show();
+            } else {
+                requestStoragePermissions();
+            }
+            return false;
+        }
+    }
+
+    private void requestStoragePermissions() {
+        ActivityCompat.requestPermissions(this,
+                new String[] {
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                }, Constants.REQUEST_PERMISSION_STORAGE);
+    }
+
     /**
      * TODO: Implementar forma melhor e assíncrona para recuperação das faixas
      */
     @Deprecated
     private void findTrackFiles() {
+        if (!checkStoragePermissions()) {
+            return;
+        }
+
         Uri trackUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
 
         String[] trackColumns = {
@@ -171,6 +232,9 @@ public class MainActivity extends BaseActivity
         }
 
         mTrackAdapter.setTrackList(trackList);
+        if (mediaPlayerService != null) {
+            mediaPlayerService.setTrackList(trackList);
+        }
     }
 
     @Override
