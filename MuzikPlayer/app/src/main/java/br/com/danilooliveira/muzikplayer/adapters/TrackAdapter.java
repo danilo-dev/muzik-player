@@ -1,10 +1,7 @@
 package br.com.danilooliveira.muzikplayer.adapters;
 
-import android.app.Activity;
 import android.content.Context;
-import android.database.Cursor;
 import android.net.Uri;
-import android.provider.MediaStore;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +12,9 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 
 import br.com.danilooliveira.muzikplayer.R;
 import br.com.danilooliveira.muzikplayer.domain.Track;
@@ -30,16 +29,16 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     private OnAdapterListener audioClickListener;
     private LayoutInflater layoutInflater;
-
-    private Context mContext;
-    private List<Track> trackList;
     private Picasso picasso;
+    private SimpleDateFormat timeFormatter;
+
+    private List<Track> trackList;
 
     public TrackAdapter(Context context, OnAdapterListener audioClickListener) {
-        layoutInflater = LayoutInflater.from(context);
-        mContext = context;
         this.audioClickListener = audioClickListener;
+        layoutInflater = LayoutInflater.from(context);
         picasso = Picasso.with(context);
+        timeFormatter = new SimpleDateFormat("mm:ss", Locale.getDefault());
     }
 
     @Override
@@ -78,6 +77,7 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     public void setTrackList(List<Track> trackList) {
         this.trackList = trackList;
+        this.trackList.add(0, null);
         notifyDataSetChanged();
     }
 
@@ -85,54 +85,25 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         private ImageView imgAlbumArt;
         private TextView txtTitle;
         private TextView txtArtist;
+        private TextView txtDuration;
 
         TrackViewHolder(View itemView) {
             super(itemView);
             imgAlbumArt = itemView.findViewById(R.id.img_album_art);
             txtTitle = itemView.findViewById(R.id.txt_title);
             txtArtist = itemView.findViewById(R.id.txt_artist);
+            txtDuration = itemView.findViewById(R.id.txt_duration);
         }
 
         void onBind(final Track track) {
             txtTitle.setText(track.getTitle());
             txtArtist.setText(track.getArtist());
+            txtDuration.setText(timeFormatter.format(track.getDuration()));
 
-            if (track.getAlbumId() != null) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (track.getAlbumArt() == null) {
-                            Uri albumUri = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI;
-                            String[] albumColumns = {
-                                    MediaStore.Audio.Albums._ID,
-                                    MediaStore.Audio.AlbumColumns.ALBUM_ART
-                            };
-                            String albumConditions = MediaStore.Audio.Albums._ID + "= ?";
-                            String albumArgs = track.getAlbumId();
-
-
-                            Cursor albumCursor = mContext.getContentResolver().query(albumUri, albumColumns, albumConditions, new String[] {albumArgs}, null);
-                            if (albumCursor != null) {
-                                if (albumCursor.moveToNext()) {
-                                    track.setAlbumArt(albumCursor.getString(albumCursor.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.ALBUM_ART)));
-                                }
-                                albumCursor.close();
-                            }
-                        }
-
-                        ((Activity) mContext).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (track.getAlbumArt() == null) {
-                                    imgAlbumArt.setImageResource(R.drawable.ic_placeholder_album_small);
-                                } else {
-                                    picasso.load(Uri.fromFile(new File(track.getAlbumArt()))).into(imgAlbumArt);
-                                }
-                            }
-                        });
-
-                    }
-                }).start();
+            if (track.getAlbumArt() == null) {
+                imgAlbumArt.setImageResource(R.drawable.ic_placeholder_album_small);
+            } else {
+                picasso.load(Uri.fromFile(new File(track.getAlbumArt()))).into(imgAlbumArt);
             }
 
             this.itemView.setOnClickListener(new View.OnClickListener() {

@@ -15,7 +15,9 @@ public class Track implements Parcelable {
     private String title;
     private String artist;
     private String albumId;
+    private String albumName;
     private String albumArt;
+    private int duration;
     private String data;
 
     public Track(Cursor cursor) {
@@ -23,6 +25,7 @@ public class Track implements Parcelable {
         title = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
         artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
         albumId = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+        duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
         data = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
     }
 
@@ -31,7 +34,9 @@ public class Track implements Parcelable {
         title = in.readString();
         artist = in.readString();
         albumId = in.readString();
+        albumName = in.readString();
         albumArt = in.readString();
+        duration = in.readInt();
         data = in.readString();
     }
 
@@ -47,8 +52,8 @@ public class Track implements Parcelable {
         return artist;
     }
 
-    public String getAlbumId() {
-        return albumId;
+    public String getAlbumName() {
+        return albumName;
     }
 
     @Nullable
@@ -56,8 +61,12 @@ public class Track implements Parcelable {
         return albumArt;
     }
 
-    public void setAlbumArt(@Nullable String albumArt) {
+    public void setAlbumArt(String albumArt) {
         this.albumArt = albumArt;
+    }
+
+    public int getDuration() {
+        return duration;
     }
 
     public String getData() {
@@ -75,7 +84,9 @@ public class Track implements Parcelable {
         parcel.writeString(title);
         parcel.writeString(artist);
         parcel.writeString(albumId);
+        parcel.writeString(albumName);
         parcel.writeString(albumArt);
+        parcel.writeInt(duration);
         parcel.writeString(data);
     }
 

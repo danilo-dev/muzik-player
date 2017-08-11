@@ -149,6 +149,7 @@ public class MainActivity extends BaseActivity
                 MediaStore.Audio.Media.TITLE,
                 MediaStore.Audio.Media.ARTIST,
                 MediaStore.Audio.Media.ALBUM_ID,
+                MediaStore.Audio.Media.DURATION,
                 MediaStore.Audio.Media.DATA
         };
 
