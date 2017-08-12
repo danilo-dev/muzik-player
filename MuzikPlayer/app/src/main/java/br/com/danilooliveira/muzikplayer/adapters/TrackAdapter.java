@@ -54,16 +54,20 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (holder instanceof ButtonViewHolder) {
-            ((ButtonViewHolder) holder).onBind();
-        } else if (holder instanceof TrackViewHolder) {
-            ((TrackViewHolder) holder).onBind(trackList.get(position));
+        switch (getItemViewType(position)) {
+            case TYPE_BUTTON:
+                ((ButtonViewHolder) holder).onBind();
+                break;
+
+            case TYPE_TRACK:
+                ((TrackViewHolder) holder).onBind(trackList.get(--position));
+                break;
         }
     }
 
     @Override
     public int getItemCount() {
-        return trackList != null ? trackList.size() : 0;
+        return trackList != null ? trackList.size() + 1 : 0;
     }
 
     @Override
@@ -77,7 +81,6 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     public void setTrackList(List<Track> trackList) {
         this.trackList = trackList;
-        this.trackList.add(0, null);
         notifyDataSetChanged();
     }
 

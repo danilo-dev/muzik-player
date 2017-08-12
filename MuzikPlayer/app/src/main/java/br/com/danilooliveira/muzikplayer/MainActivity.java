@@ -78,7 +78,7 @@ public class MainActivity extends BaseActivity
         mTrackAdapter = new TrackAdapter(this, new OnAdapterListener() {
             @Override
             public void onTrackClick(Track track) {
-                mediaPlayerService.resetHistoryList(track);
+                mediaPlayerService.resetQueue(track);
             }
 
             @Override
@@ -112,13 +112,13 @@ public class MainActivity extends BaseActivity
         btnPlayerBottomPrevious.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mediaPlayerService.playPreviousTrack();
+                mediaPlayerService.playPrevious();
             }
         });
         btnPlayerBottomNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mediaPlayerService.playNextTrack();
+                mediaPlayerService.playNext();
             }
         });
 

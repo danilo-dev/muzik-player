@@ -17,8 +17,8 @@ import android.support.v4.media.session.PlaybackStateCompat;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 import br.com.danilooliveira.muzikplayer.domain.Track;
 import br.com.danilooliveira.muzikplayer.utils.AppPreferences;
@@ -31,19 +31,16 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     private PlaybackStateCompat.Builder playbackStateBuilder;
     private MediaPlayer mediaPlayer;
 
-    private Random random;
+    /**
+     * Faixas ordenadas alfabeticamente
+     */
+    private List<Track> trackList;
 
     /**
-     * Lista com todas as faixas
+     * Fila de reprodução
      */
-    private List<Track> mTrackList;
+    private List<Track> queue;
 
-    /**
-     * Histórico das faixas reproduzidas
-     */
-    private List<Track> trackHistoryList;
-    @Deprecated
-    private int remainTracks; // TODO: Substituir implementação de contador
     private int currentPosition;
     private boolean isShuffle;
     @IntRange(from = Constants.TYPE_NO_REPEAT, to = Constants.TYPE_REPEAT_ALL)
@@ -66,7 +63,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             public void onPlay() {
                 super.onPlay();
                 // TODO: Corrigir implementação do click dos botões de headset
-                if (mediaPlayer == null || mTrackList == null || mTrackList.isEmpty()) {
+                if (mediaPlayer == null || trackList == null || trackList.isEmpty()) {
                     return;
                 }
                 if (mediaPlayer.isPlaying()) {
@@ -82,11 +79,8 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         mediaPlayer = new MediaPlayer();
         mediaPlayer.setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK);
 
-        random = new Random();
+        queue = new ArrayList<>();
 
-        mTrackList = new ArrayList<>();
-        trackHistoryList = new ArrayList<>();
-        remainTracks = 0;
         currentPosition = 0;
         isShuffle = AppPreferences.with(this).isShuffleEnabled();
         repeatType = AppPreferences.with(this).getRepeatType();
@@ -148,8 +142,8 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                 public void onCompletion(MediaPlayer mediaPlayer) {
                     switch (repeatType) {
                         case Constants.TYPE_NO_REPEAT:
-                            if (--remainTracks > 0) {
-                                playNextTrack();
+                            if (currentPosition < queue.size()) {
+                                playNext();
                             }
                             break;
 
@@ -158,7 +152,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                             break;
 
                         case Constants.TYPE_REPEAT_ALL:
-                            playNextTrack();
+                            playNext();
                             break;
                     }
                 }
@@ -195,16 +189,23 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             mediaPlayer.start();
         } catch (IOException e) {
             e.printStackTrace();
-            playNextTrack();
+            playNext();
         }
     }
 
     /**
      * Retorna uma faixa
-     * Se houver faixas no histórico, é reproduzida
-     * Senão, reproduz uma nova faixa e a adiciona ao histórico
+     *
+     * Se estiver no modo aleatório {@link MediaPlayerService#isShuffle}
+     * e voltar a uma faixa antes que a primeira (index = 0), cria uma
+     * nova fila {@link MediaPlayerService#mixUpQueue()} e começa a
+     * reproduzir a partir da primeira (index = 0)
+     *
+     * Se estiver no modo normal {@link MediaPlayerService#isShuffle} e
+     * voltar a uma faixa antes que a primeira (index = 0), reproduz a
+     * última (index = list.size() - 1)
      */
-    public void playPreviousTrack() {
+    public void playPrevious() {
         Track track;
 
         currentPosition--;
@@ -212,13 +213,14 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         if (isShuffle) {
             if (currentPosition < 0) {
                 currentPosition = 0;
-                track = getRandomTrack();
-                trackHistoryList.add(0, track);
-            } else {
-                track = trackHistoryList.get(currentPosition);
+                mixUpQueue();
             }
+            track = queue.get(currentPosition);
         } else {
-            track = mTrackList.get(currentPosition);
+            if (currentPosition < 0) {
+                currentPosition = trackList.size() - 1;
+            }
+            track = trackList.get(currentPosition);
         }
 
         playTrack(track);
@@ -226,23 +228,32 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
     /**
      * Avança uma faixa
-     * Se houver faixas no histórico relativa a posição, é reproduzida
-     * Senão, reproduz uma nova faixa e a adiciona ao histórico
+     *
+     * Se estiver no modo aleatório {@link MediaPlayerService#isShuffle}
+     * e avançar além da última faixa (index = list.size() - 1), cria uma
+     * nova lista {@link MediaPlayerService#mixUpQueue()} e começa a
+     * reproduzir a partir da primeira (index = 0)
+     *
+     * Se estiver no modo normal {@link MediaPlayerService#isShuffle}
+     * e avançar além da última faixa (index = list.size() -1), reproduz
+     * a primeira (index = 0)
      */
-    public void playNextTrack() {
+    public void playNext() {
         Track track;
 
         currentPosition++;
 
         if (isShuffle) {
-            if (currentPosition >= trackHistoryList.size()) {
-                track = getRandomTrack();
-                trackHistoryList.add(track);
-            } else {
-                track = trackHistoryList.get(currentPosition);
+            if (currentPosition >= queue.size()) {
+                currentPosition = 0;
+                mixUpQueue();
             }
+            track = queue.get(currentPosition);
         } else {
-            track = mTrackList.get(currentPosition);
+            if (currentPosition >= trackList.size()) {
+                currentPosition = 0;
+            }
+            track = trackList.get(currentPosition);
         }
 
         playTrack(track);
@@ -253,12 +264,13 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
      */
     public void playShuffle() {
         currentPosition = 0;
-        trackHistoryList.clear();
+        isShuffle = true;
 
-        Track track = getRandomTrack();
-        trackHistoryList.add(track);
+        mixUpQueue();
 
-        playTrack(track);
+        // TODO: Enviar broadcast com atualização do shuffle
+
+        playTrack(queue.get(currentPosition));
     }
 
     public void setCurrentDuration(int duration) {
@@ -273,14 +285,14 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         isShuffle = !isShuffle;
 
         if (isShuffle) {
-            trackHistoryList.add(mTrackList.get(currentPosition));
-            currentPosition = 0;
+            mixUpQueue();
+            currentPosition = queue.indexOf(trackList.get(currentPosition));
         } else {
-            currentPosition = mTrackList.indexOf(trackHistoryList.get(currentPosition));
-            trackHistoryList.clear();
+            currentPosition = trackList.indexOf(queue.get(currentPosition));
         }
 
         AppPreferences.with(this).setShuffleEnabled(isShuffle);
+        // TODO: Lançar broadcast com atualização do shuffle
 
         return isShuffle;
     }
@@ -290,29 +302,25 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             repeatType = Constants.TYPE_REPEAT_ALL;
         }
 
-        if (repeatType == Constants.TYPE_NO_REPEAT) {
-            remainTracks = mTrackList.size();
-        }
-
         AppPreferences.with(this).setRepeatType(repeatType);
+        // TODO: Lançar broadcast com atualização do modo de repetição
 
         return repeatType;
     }
 
     /**
-     * Limpa o histórico de faixas
-     * Reproduz uma nova faixa, se não for null
-     * @param track Faixa a ser tocada
+     * Reseta a fila de músicas
+     * Toca uma faixa, se não for null
      */
-    public void resetHistoryList(@Nullable Track track) {
+    public void resetQueue(@Nullable Track track) {
         currentPosition = 0;
-        trackHistoryList.clear();
+        mixUpQueue();
 
         if (track != null) {
             if (isShuffle) {
-                trackHistoryList.add(track);
+                currentPosition = queue.indexOf(track);
             } else {
-                currentPosition = mTrackList.indexOf(track);
+                currentPosition = trackList.indexOf(track);
             }
             playTrack(track);
         }
@@ -320,13 +328,12 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
     /**
      * Recupera a faixa atual
-     * @return  Faixa
      */
     public Track getCurrentTrack() {
         if (isShuffle) {
-            return trackHistoryList.get(currentPosition);
+            return queue.get(currentPosition);
         } else {
-            return mTrackList.get(currentPosition);
+            return trackList.get(currentPosition);
         }
     }
 
@@ -371,18 +378,17 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     }
 
     public void setTrackList(List<Track> trackList) {
-        mTrackList = trackList;
-        if (repeatType == Constants.TYPE_NO_REPEAT) {
-            remainTracks = trackList.size();
-        }
+        this.trackList = trackList;
     }
 
     /**
-     * Obtém uma faixa aleatória da lista
-     * @return  Faixa
+     * Recria uma fila aleatória
      */
-    private Track getRandomTrack() {
-        return mTrackList.get(random.nextInt(mTrackList.size()));
+    private void mixUpQueue() {
+        queue.clear();
+        queue.addAll(trackList);
+
+        Collections.shuffle(queue);
     }
 
     public class TrackBinder extends Binder {

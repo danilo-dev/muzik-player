@@ -87,13 +87,13 @@ public class PlayerActivity extends BaseActivity {
         findViewById(R.id.btn_previous).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mediaPlayerService.playPreviousTrack();
+                mediaPlayerService.playPrevious();
             }
         });
         findViewById(R.id.btn_next).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mediaPlayerService.playNextTrack();
+                mediaPlayerService.playNext();
             }
         });
         btnShuffle.setOnClickListener(new View.OnClickListener() {
