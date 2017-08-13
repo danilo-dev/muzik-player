@@ -158,9 +158,11 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                 }
             });
 
-            Intent i = new Intent(Constants.ACTION_TRACK_CHANGED);
-            i.putExtra(Constants.BUNDLE_TRACK, track);
-            LocalBroadcastManager.getInstance(this).sendBroadcast(i);
+            Intent trackChanged = new Intent(Constants.ACTION_TRACK_CHANGED);
+            trackChanged.putExtra(Constants.BUNDLE_TRACK, track);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(trackChanged);
+
+            LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PLAY));
 
             /*NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
             notificationBuilder
