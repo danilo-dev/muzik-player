@@ -1,6 +1,9 @@
 package br.com.danilooliveira.muzikplayer.services;
 
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Bundle;
@@ -9,17 +12,23 @@ import android.os.PowerManager;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaBrowserServiceCompat;
+import android.support.v4.media.session.MediaButtonReceiver;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v7.app.NotificationCompat;
+import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import br.com.danilooliveira.muzikplayer.MainActivity;
+import br.com.danilooliveira.muzikplayer.R;
 import br.com.danilooliveira.muzikplayer.domain.Track;
 import br.com.danilooliveira.muzikplayer.utils.AppPreferences;
 import br.com.danilooliveira.muzikplayer.utils.Constants;
@@ -30,6 +39,8 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     private MediaSessionCompat mediaSession;
     private PlaybackStateCompat.Builder playbackStateBuilder;
     private MediaPlayer mediaPlayer;
+
+    private AppNotification appNotification;
 
     /**
      * Faixas ordenadas alfabeticamente
@@ -54,7 +65,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                 | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
 
         playbackStateBuilder = new PlaybackStateCompat.Builder()
-                .setActions(PlaybackStateCompat.ACTION_PLAY);
+                .setActions(PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_SKIP_TO_NEXT);
 
         mediaSession.setActive(true);
         mediaSession.setPlaybackState(playbackStateBuilder.build());
@@ -62,6 +73,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             @Override
             public void onPlay() {
                 super.onPlay();
+                Log.d(MediaPlayerService.class.getSimpleName(), "onPlay");
                 // TODO: Corrigir implementação do click dos botões de headset
                 if (mediaPlayer == null || trackList == null || trackList.isEmpty()) {
                     return;
@@ -69,11 +81,16 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                 changeTrackRunningState();
             }
         });
+        mediaSession.setMediaButtonReceiver(MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY));
+
+        MediaButtonReceiver.handleIntent(mediaSession, new Intent(Intent.ACTION_MEDIA_BUTTON));
 
         setSessionToken(mediaSession.getSessionToken());
 
         mediaPlayer = new MediaPlayer();
         mediaPlayer.setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK);
+
+        appNotification = new AppNotification(this, mediaSession);
 
         queue = new ArrayList<>();
 
@@ -85,6 +102,31 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     @Override
     public IBinder onBind(Intent intent) {
         return trackBinder;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent.getAction() != null && !intent.getAction().isEmpty()) {
+            Log.d(MediaPlayerService.class.getSimpleName(), "Action: " + intent.getAction());
+            switch (intent.getAction()) {
+                case Constants.ACTION_PLAY_PAUSE:
+                    changeTrackRunningState();
+                    break;
+
+                case Constants.ACTION_NEXT_TRACK:
+                    playNext();
+                    break;
+
+                case Constants.ACTION_PREVIOUS_TRACK:
+                    playPrevious();
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        return super.onStartCommand(intent, flags, startId);
     }
 
     @Nullable
@@ -159,29 +201,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
             LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PLAY));
 
-            /*NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
-            notificationBuilder
-                    .setContentTitle(track.getTitle())
-                    .setContentText(track.getArtist())
-                    .setLargeIcon(BitmapFactory.decodeFile(track.getAlbumArt()))
-
-                    .setContentIntent(mediaSession.getController().getSessionActivity())
-                    .setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_STOP))
-
-                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                    .setSmallIcon(R.drawable.ic_logo)
-                    .setColor(ContextCompat.getColor(this, R.color.background_primary))
-
-                    .addAction(new NotificationCompat.Action(
-                            R.drawable.ic_pause, getString(R.string.btn_pause),
-                            MediaButtonReceiver.buildMediaButtonPendingIntent(this,
-                                    PlaybackStateCompat.ACTION_PLAY_PAUSE)))
-
-                    .setStyle(new NotificationCompat.MediaStyle()
-                            .setMediaSession(mediaSession.getSessionToken())
-                            .setShowActionsInCompactView(0));
-
-            startForeground(10, notificationBuilder.build());*/
+            appNotification.setTrack(track).show();
 
             mediaPlayer.start();
         } catch (IOException e) {
@@ -394,6 +414,61 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         queue.addAll(trackList);
 
         Collections.shuffle(queue);
+    }
+
+    private class AppNotification {
+        private static final int NOTIFICATION_ID = 10;
+
+        private NotificationCompat.Builder notification;
+
+        AppNotification(Context context, MediaSessionCompat mediaSession) {
+            Intent nextIntent = new Intent(context, MediaPlayerService.class);
+            nextIntent.setAction(Constants.ACTION_NEXT_TRACK);
+
+            Intent pauseIntent = new Intent(context, MediaPlayerService.class);
+            pauseIntent.setAction(Constants.ACTION_PLAY_PAUSE);
+
+            Intent previousIntent = new Intent(context, MediaPlayerService.class);
+            previousIntent.setAction(Constants.ACTION_PREVIOUS_TRACK);
+
+            Intent openPlayerIntent = new Intent(context, MainActivity.class);
+
+            notification = new NotificationCompat.Builder(context);
+            notification
+                    .setContentIntent(PendingIntent.getService(context, 0, openPlayerIntent, 0))
+                    .setDeleteIntent(PendingIntent.getService(context, 0, pauseIntent, 0))
+
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .setSmallIcon(R.drawable.ic_logo_flat_white)
+                    .setColor(ContextCompat.getColor(context, R.color.colorAccent))
+
+                    .addAction(R.drawable.ic_skip_previous, getString(R.string.btn_previous_track),
+                            PendingIntent.getService(context, 0, previousIntent, 0))
+
+                    .addAction(R.drawable.ic_pause, getString(R.string.btn_pause),
+                            PendingIntent.getService(context, 0, pauseIntent, 0))
+
+                    .addAction(R.drawable.ic_skip_next, getString(R.string.btn_next_track),
+                            PendingIntent.getService(context, 0, nextIntent, 0))
+
+                    .setStyle(new NotificationCompat.MediaStyle()
+                            .setMediaSession(mediaSession.getSessionToken())
+                            .setShowActionsInCompactView(0, 1, 2)
+                            .setCancelButtonIntent(PendingIntent.getService(context, 0, pauseIntent, 0)));
+        }
+
+        AppNotification setTrack(Track track) {
+            // contentTitle, contextText, large icon
+            notification.setContentTitle(track.getTitle())
+                    .setContentText(track.getArtist())
+                    .setLargeIcon(BitmapFactory.decodeFile(track.getAlbumArt()));
+            return this;
+        }
+
+        AppNotification show() {
+            startForeground(NOTIFICATION_ID, notification.build());
+            return this;
+        }
     }
 
     public class TrackBinder extends Binder {

@@ -5,7 +5,10 @@ package br.com.danilooliveira.muzikplayer.utils;
  */
 public interface Constants {
     String ACTION_PAUSE = "br.com.danilooliveira.muzikplayer.intent.ACTION_PAUSE";
+    String ACTION_NEXT_TRACK = "br.com.danilooliveira.muzikplayer.intent.ACTION_NEXT_TRACK";
     String ACTION_PLAY = "br.com.danilooliveira.muzikplayer.intent.ACTION_PLAY";
+    String ACTION_PLAY_PAUSE = "br.com.danilooliveira.muzikplayer.intent.ACTION_PLAY_PAUSE";
+    String ACTION_PREVIOUS_TRACK = "br.com.danilooliveira.muzikplayer.intent.ACTION_PREVIOUS_TRACK";
     String ACTION_REPEAT_TYPE_CHANGED = "br.com.danilooliveira.muzikplayer.intent.ACTION_REPEAT_TYPE_CHANGED";
     String ACTION_SHUFFLE_CHANGED = "br.com.danilooliveira.muzikplayer.intent.ACTION_SHUFFLE_CHANGED";
     String ACTION_TRACK_CHANGED = "br.com.danilooliveira.muzikplayer.intent.ACTION_TRACK_CHANGED";
