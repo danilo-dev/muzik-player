@@ -34,10 +34,6 @@ import br.com.danilooliveira.muzikplayer.utils.AppPreferences;
 import br.com.danilooliveira.muzikplayer.utils.Constants;
 
 public class MediaPlayerService extends MediaBrowserServiceCompat {
-    private IBinder trackBinder = new TrackBinder();
-
-    private MediaSessionCompat mediaSession;
-    private PlaybackStateCompat.Builder playbackStateBuilder;
     private MediaPlayer mediaPlayer;
 
     private AppNotification appNotification;
@@ -60,12 +56,12 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     @Override
     public void onCreate() {
         super.onCreate();
-        mediaSession = new MediaSessionCompat(this, MediaPlayerService.class.getSimpleName());
+        MediaSessionCompat mediaSession = new MediaSessionCompat(this, MediaPlayerService.class.getSimpleName());
         mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
                 | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
 
-        playbackStateBuilder = new PlaybackStateCompat.Builder()
-                .setActions(PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_SKIP_TO_NEXT);
+        PlaybackStateCompat.Builder playbackStateBuilder = new PlaybackStateCompat.Builder()
+                .setActions(PlaybackStateCompat.ACTION_PLAY);
 
         mediaSession.setActive(true);
         mediaSession.setPlaybackState(playbackStateBuilder.build());
@@ -73,7 +69,6 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             @Override
             public void onPlay() {
                 super.onPlay();
-                Log.d(MediaPlayerService.class.getSimpleName(), "onPlay");
                 // TODO: Corrigir implementação do click dos botões de headset
                 if (mediaPlayer == null || trackList == null || trackList.isEmpty()) {
                     return;
@@ -81,7 +76,6 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                 changeTrackRunningState();
             }
         });
-        mediaSession.setMediaButtonReceiver(MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY));
 
         MediaButtonReceiver.handleIntent(mediaSession, new Intent(Intent.ACTION_MEDIA_BUTTON));
 
@@ -101,7 +95,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return trackBinder;
+        return new TrackBinder();
     }
 
     @Override
@@ -132,7 +126,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     @Nullable
     @Override
     public BrowserRoot onGetRoot(@NonNull String clientPackageName, int clientUid, @Nullable Bundle rootHints) {
-        return new BrowserRoot("abc", null);
+        return null;
     }
 
     @Override
@@ -458,7 +452,6 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         }
 
         AppNotification setTrack(Track track) {
-            // contentTitle, contextText, large icon
             notification.setContentTitle(track.getTitle())
                     .setContentText(track.getArtist())
                     .setLargeIcon(BitmapFactory.decodeFile(track.getAlbumArt()));
