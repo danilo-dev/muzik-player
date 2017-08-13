@@ -3,35 +3,35 @@ package br.com.danilooliveira.muzikplayer;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
-
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import br.com.danilooliveira.muzikplayer.domain.Track;
+import br.com.danilooliveira.muzikplayer.fragments.TrackInfoFragment;
 import br.com.danilooliveira.muzikplayer.utils.Constants;
 
 /**
  * Criado por Danilo de Oliveira (danilo.desenvolvedor@outlook.com) em 06/08/2017.
  */
 public class PlayerActivity extends BaseActivity {
-    private ImageView imgAlbumArt;
-    private TextView txtTitle, txtArtist, txtCurrentDuration, txtTotalDuration;
+    private ViewPager mViewPager;
+    private TextView txtCurrentDuration, txtTotalDuration;
     private SeekBar seekTrackIndicator;
     private ImageButton btnShuffle, btnStateControl, btnRepeat;
 
+    private TrackSwipePager trackSwipePager;
     private SimpleDateFormat timeFormatter = new SimpleDateFormat("mm:ss", Locale.getDefault());
     private Timer timer = new Timer();
 
@@ -40,9 +40,7 @@ public class PlayerActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
-        imgAlbumArt = (ImageView) findViewById(R.id.img_album_art);
-        txtTitle = (TextView) findViewById(R.id.txt_title);
-        txtArtist = (TextView) findViewById(R.id.txt_artist);
+        mViewPager = (ViewPager) findViewById(R.id.view_pager);
         txtCurrentDuration = (TextView) findViewById(R.id.txt_current_duration);
         txtTotalDuration = (TextView) findViewById(R.id.txt_total_duration);
         seekTrackIndicator = (SeekBar) findViewById(R.id.seek_track_indicator);
@@ -50,8 +48,9 @@ public class PlayerActivity extends BaseActivity {
         btnStateControl = (ImageButton) findViewById(R.id.btn_state_control);
         btnRepeat = (ImageButton) findViewById(R.id.btn_repeat);
 
-        txtTitle.setSelected(true);
-        txtArtist.setSelected(true);
+        mViewPager.setOffscreenPageLimit(3);
+
+        trackSwipePager = new TrackSwipePager(getSupportFragmentManager());
 
         seekTrackIndicator.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -140,16 +139,8 @@ public class PlayerActivity extends BaseActivity {
         }
     }
 
-    private void updateTrackInfo(Track track) {
-        txtTitle.setText(track.getTitle());
-        txtArtist.setText(track.getArtist());
-
-        if (track.getAlbumArt() != null) {
-            Picasso.with(this).load(Uri.fromFile(new File(track.getAlbumArt()))).into(imgAlbumArt);
-        } else {
-            imgAlbumArt.setImageResource(R.drawable.ic_placeholder_album_large);
-        }
-
+    private void updateTrackInfo() {
+        mViewPager.setCurrentItem(mediaPlayerService.getCurrentPosition(), true);
         txtTotalDuration.setText(timeFormatter.format(mediaPlayerService.getTotalDuration()));
         seekTrackIndicator.setMax(mediaPlayerService.getMediaPlayer().getDuration());
     }
@@ -164,7 +155,7 @@ public class PlayerActivity extends BaseActivity {
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                updateTrackInfo((Track) intent.getParcelableExtra(Constants.BUNDLE_TRACK));
+                updateTrackInfo();
             }
         };
     }
@@ -211,10 +202,49 @@ public class PlayerActivity extends BaseActivity {
 
     @Override
     protected void onServiceConnected() {
+        mViewPager.setAdapter(trackSwipePager);
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                /*if (position > mediaPlayerService.getCurrentPosition()) {
+                    mediaPlayerService.playNext();
+                } else if (position < mediaPlayerService.getCurrentPosition()) {
+                    mediaPlayerService.playPrevious();
+                }*/
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
         btnStateControl.setImageResource(mediaPlayerService.isPlaying()? R.drawable.ic_pause_circle : R.drawable.ic_play_circle);
-        updateTrackInfo(mediaPlayerService.getCurrentTrack());
+        updateTrackInfo();
         updateDurationInfo();
         changeShuffle(mediaPlayerService.isShuffle());
         changeRepeat(mediaPlayerService.getRepeatType());
+    }
+
+    private class TrackSwipePager extends FragmentPagerAdapter {
+
+        TrackSwipePager(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return TrackInfoFragment.newInstance(mediaPlayerService.getCurrentTrackList().get(position));
+        }
+
+        @Override
+        public int getCount() {
+            return mediaPlayerService.getCurrentTrackList().size();
+        }
     }
 }

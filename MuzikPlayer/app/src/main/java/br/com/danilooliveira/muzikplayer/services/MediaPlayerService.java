@@ -356,6 +356,10 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         }
     }
 
+    public int getCurrentPosition() {
+        return currentPosition;
+    }
+
     /**
      * Retorna se há alguma música tocando
      * @return  true se estiver tocando
@@ -390,6 +394,14 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
      */
     public int getTotalDuration() {
         return mediaPlayer.getDuration();
+    }
+
+    public List<Track> getCurrentTrackList() {
+        if (isShuffle) {
+            return queue;
+        } else {
+            return trackList;
+        }
     }
 
     public MediaPlayer getMediaPlayer() {
