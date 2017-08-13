@@ -173,10 +173,12 @@ public class MainActivity extends BaseActivity
         } else {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                     || ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-                dialog.setTitle(R.string.dialog_permission_storage_title);
-                dialog.setMessage(R.string.dialog_permission_storage_message);
-                dialog.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog);
+                dialog.setIcon(R.drawable.ic_sd_card)
+                        .setTitle(R.string.dialog_permission_storage_title)
+                        .setMessage(R.string.dialog_permission_storage_message)
+                        .setCancelable(false);
+                dialog.setPositiveButton(R.string.dialog_permission_storage_btn_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         requestStoragePermissions();

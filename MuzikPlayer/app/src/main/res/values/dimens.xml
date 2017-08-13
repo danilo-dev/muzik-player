@@ -5,6 +5,4 @@
     <dimen name="album_art_large">270dp</dimen>
 
     <dimen name="button_player_bottom_size">32dp</dimen>
-
-    <dimen name="dialog_radius">4dp</dimen>
 </resources>
