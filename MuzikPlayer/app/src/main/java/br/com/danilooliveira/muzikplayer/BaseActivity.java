@@ -19,9 +19,10 @@ import br.com.danilooliveira.muzikplayer.utils.Constants;
  * Criado por Danilo de Oliveira (danilo.desenvolvedor@outlook.com) em 06/08/2017.
  */
 public abstract class BaseActivity extends AppCompatActivity {
-    private BroadcastReceiver onTrackChangedReceiver;
     private BroadcastReceiver onPauseTrackReceiver;
     private BroadcastReceiver onPlayTrackReceiver;
+    private BroadcastReceiver onShuffleChangedReceiver;
+    private BroadcastReceiver onTrackChangedReceiver;
 
     protected MediaPlayerService mediaPlayerService;
 
@@ -44,9 +45,10 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        onTrackChangedReceiver = onTrackChanged();
         onPauseTrackReceiver = onPauseTrack();
         onPlayTrackReceiver = onPlayTrack();
+        onShuffleChangedReceiver = onShuffleChanged();
+        onTrackChangedReceiver = onTrackChanged();
     }
 
     @Override
@@ -57,26 +59,34 @@ public abstract class BaseActivity extends AppCompatActivity {
             startService(mediaIntent);
             bindService(mediaIntent, serviceConnection, Context.BIND_AUTO_CREATE);
         }
-        LocalBroadcastManager.getInstance(this).registerReceiver(onTrackChangedReceiver, new IntentFilter(Constants.ACTION_TRACK_CHANGED));
-        LocalBroadcastManager.getInstance(this).registerReceiver(onPauseTrackReceiver, new IntentFilter(Constants.ACTION_PAUSE));
-        LocalBroadcastManager.getInstance(this).registerReceiver(onPlayTrackReceiver, new IntentFilter(Constants.ACTION_PLAY));
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(onPauseTrackReceiver, new IntentFilter(Constants.ACTION_PAUSE));
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(onPlayTrackReceiver, new IntentFilter(Constants.ACTION_PLAY));
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(onShuffleChangedReceiver, new IntentFilter(Constants.ACTION_SHUFFLE_CHANGED));
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(onTrackChangedReceiver, new IntentFilter(Constants.ACTION_TRACK_CHANGED));
     }
 
     @Override
     protected void onDestroy() {
         stopService(mediaIntent);
         unbindService(serviceConnection);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(onTrackChangedReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(onPauseTrackReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(onPlayTrackReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(onShuffleChangedReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(onTrackChangedReceiver);
         super.onDestroy();
     }
-
-    protected abstract BroadcastReceiver onTrackChanged();
 
     protected abstract BroadcastReceiver onPauseTrack();
 
     protected abstract BroadcastReceiver onPlayTrack();
+
+    protected abstract BroadcastReceiver onShuffleChanged();
+
+    protected abstract BroadcastReceiver onTrackChanged();
 
     protected abstract void onServiceConnected();
 }

@@ -268,7 +268,9 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
         mixUpQueue();
 
-        // TODO: Enviar broadcast com atualização do shuffle
+        Intent i = new Intent(Constants.ACTION_SHUFFLE_CHANGED);
+        i.putExtra(Constants.BUNDLE_SHUFFLE, isShuffle);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(i);
 
         playTrack(queue.get(currentPosition));
     }
@@ -292,7 +294,10 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         }
 
         AppPreferences.with(this).setShuffleEnabled(isShuffle);
-        // TODO: Lançar broadcast com atualização do shuffle
+
+        Intent i = new Intent(Constants.ACTION_SHUFFLE_CHANGED);
+        i.putExtra(Constants.BUNDLE_SHUFFLE, isShuffle);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(i);
 
         return isShuffle;
     }

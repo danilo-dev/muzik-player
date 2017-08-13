@@ -99,7 +99,7 @@ public class PlayerActivity extends BaseActivity {
         btnShuffle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                changeShuffle(mediaPlayerService.changeShuffleState());
+                mediaPlayerService.changeShuffleState();
             }
         });
         btnRepeat.setOnClickListener(new View.OnClickListener() {
@@ -193,6 +193,16 @@ public class PlayerActivity extends BaseActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 btnStateControl.setImageResource(R.drawable.ic_pause_circle);
+            }
+        };
+    }
+
+    @Override
+    protected BroadcastReceiver onShuffleChanged() {
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                changeShuffle(intent.getBooleanExtra(Constants.BUNDLE_SHUFFLE, false));
             }
         };
     }

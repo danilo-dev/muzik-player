@@ -282,6 +282,16 @@ public class MainActivity extends BaseActivity
     }
 
     @Override
+    protected BroadcastReceiver onShuffleChanged() {
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                // Do nothing...
+            }
+        };
+    }
+
+    @Override
     protected void onServiceConnected() {
         mediaPlayerService.setTrackList(mTrackAdapter.getTrackList());
     }
