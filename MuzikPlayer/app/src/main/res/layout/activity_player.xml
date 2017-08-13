@@ -51,13 +51,13 @@
         />
 
     <RelativeLayout
+        android:background="@drawable/overlay_player_expanded"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingTop="16dp"
         >
         <TextView
             android:id="@+id/txt_current_duration"
-            android:text="00:00"
             android:textColor="@color/colorPrimary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -80,7 +80,7 @@
             android:id="@+id/seek_track_indicator"
             android:progressTint="@color/colorPrimary"
             android:thumbTint="@color/colorPrimary"
-            android:progressBackgroundTint="@color/colorAccent"
+            android:progressBackgroundTint="@color/colorAccentTertiary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
