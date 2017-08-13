@@ -21,6 +21,7 @@ import br.com.danilooliveira.muzikplayer.utils.Constants;
 public abstract class BaseActivity extends AppCompatActivity {
     private BroadcastReceiver onPauseTrackReceiver;
     private BroadcastReceiver onPlayTrackReceiver;
+    private BroadcastReceiver onRepeatTypeChangedReceiver;
     private BroadcastReceiver onShuffleChangedReceiver;
     private BroadcastReceiver onTrackChangedReceiver;
 
@@ -47,6 +48,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         onPauseTrackReceiver = onPauseTrack();
         onPlayTrackReceiver = onPlayTrack();
+        onRepeatTypeChangedReceiver = onRepeatTypeChanged();
         onShuffleChangedReceiver = onShuffleChanged();
         onTrackChangedReceiver = onTrackChanged();
     }
@@ -64,6 +66,8 @@ public abstract class BaseActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this)
                 .registerReceiver(onPlayTrackReceiver, new IntentFilter(Constants.ACTION_PLAY));
         LocalBroadcastManager.getInstance(this)
+                .registerReceiver(onRepeatTypeChangedReceiver, new IntentFilter(Constants.ACTION_REPEAT_TYPE_CHANGED));
+        LocalBroadcastManager.getInstance(this)
                 .registerReceiver(onShuffleChangedReceiver, new IntentFilter(Constants.ACTION_SHUFFLE_CHANGED));
         LocalBroadcastManager.getInstance(this)
                 .registerReceiver(onTrackChangedReceiver, new IntentFilter(Constants.ACTION_TRACK_CHANGED));
@@ -75,6 +79,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         unbindService(serviceConnection);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(onPauseTrackReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(onPlayTrackReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(onRepeatTypeChangedReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(onShuffleChangedReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(onTrackChangedReceiver);
         super.onDestroy();
@@ -83,6 +88,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected abstract BroadcastReceiver onPauseTrack();
 
     protected abstract BroadcastReceiver onPlayTrack();
+
+    protected abstract BroadcastReceiver onRepeatTypeChanged();
 
     protected abstract BroadcastReceiver onShuffleChanged();
 

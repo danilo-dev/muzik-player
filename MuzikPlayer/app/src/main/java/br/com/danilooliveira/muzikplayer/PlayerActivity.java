@@ -105,7 +105,7 @@ public class PlayerActivity extends BaseActivity {
         btnRepeat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                changeRepeat(mediaPlayerService.changeRepeatType());
+                mediaPlayerService.changeRepeatType();
             }
         });
 
@@ -193,6 +193,16 @@ public class PlayerActivity extends BaseActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 btnStateControl.setImageResource(R.drawable.ic_pause_circle);
+            }
+        };
+    }
+
+    @Override
+    protected BroadcastReceiver onRepeatTypeChanged() {
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                changeRepeat(intent.getIntExtra(Constants.BUNDLE_REPEAT_TYPE, Constants.TYPE_REPEAT_ALL));
             }
         };
     }

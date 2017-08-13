@@ -6,9 +6,11 @@ package br.com.danilooliveira.muzikplayer.utils;
 public interface Constants {
     String ACTION_PAUSE = "br.com.danilooliveira.muzikplayer.intent.ACTION_PAUSE";
     String ACTION_PLAY = "br.com.danilooliveira.muzikplayer.intent.ACTION_PLAY";
+    String ACTION_REPEAT_TYPE_CHANGED = "br.com.danilooliveira.muzikplayer.intent.ACTION_REPEAT_TYPE_CHANGED";
     String ACTION_SHUFFLE_CHANGED = "br.com.danilooliveira.muzikplayer.intent.ACTION_SHUFFLE_CHANGED";
     String ACTION_TRACK_CHANGED = "br.com.danilooliveira.muzikplayer.intent.ACTION_TRACK_CHANGED";
 
+    String BUNDLE_REPEAT_TYPE = "repeatType";
     String BUNDLE_SHUFFLE = "shuffle";
     String BUNDLE_TRACK = "track";
 

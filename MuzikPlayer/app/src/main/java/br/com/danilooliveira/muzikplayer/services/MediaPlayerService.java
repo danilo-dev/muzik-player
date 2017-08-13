@@ -308,7 +308,10 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         }
 
         AppPreferences.with(this).setRepeatType(repeatType);
-        // TODO: Lançar broadcast com atualização do modo de repetição
+
+        Intent i = new Intent(Constants.ACTION_REPEAT_TYPE_CHANGED);
+        i.putExtra(Constants.BUNDLE_REPEAT_TYPE, repeatType);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(i);
 
         return repeatType;
     }
