@@ -100,13 +100,7 @@ public class MainActivity extends BaseActivity
         btnPlayerBottomStateControl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!mediaPlayerService.isPlaying()) {
-                    btnPlayerBottomStateControl.setImageResource(R.drawable.ic_pause);
-                    mediaPlayerService.play();
-                } else {
-                    btnPlayerBottomStateControl.setImageResource(R.drawable.ic_play);
-                    mediaPlayerService.pause();
-                }
+                mediaPlayerService.changeTrackRunningState();
             }
         });
         btnPlayerBottomPrevious.setOnClickListener(new View.OnClickListener() {

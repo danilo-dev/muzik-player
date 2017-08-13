@@ -66,11 +66,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                 if (mediaPlayer == null || trackList == null || trackList.isEmpty()) {
                     return;
                 }
-                if (mediaPlayer.isPlaying()) {
-                    pause();
-                } else {
-                    play();
-                }
+                changeTrackRunningState();
             }
         });
 
@@ -113,19 +109,18 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     }
 
     /**
-     * Pausa uma faixa
+     * Pausa uma música que já esteja em execução,
+     * Se estiver pausada, é reproduzida a partir do ponto
+     * em que foi dado pause
      */
-    public void pause() {
-        mediaPlayer.pause();
-        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PAUSE));
-    }
-
-    /**
-     * Dá play em uma faixa que já esteja em execução
-     */
-    public void play() {
-        mediaPlayer.start();
-        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PLAY));
+    public void changeTrackRunningState() {
+        if (mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
+            LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PAUSE));
+        } else {
+            mediaPlayer.start();
+            LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PLAY));
+        }
     }
 
     /**

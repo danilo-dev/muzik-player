@@ -54,7 +54,6 @@ public class PlayerActivity extends BaseActivity {
         txtArtist.setSelected(true);
 
         seekTrackIndicator.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            private boolean wasPlaying;
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 txtCurrentDuration.setText(timeFormatter.format(i));
@@ -62,26 +61,19 @@ public class PlayerActivity extends BaseActivity {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                wasPlaying = mediaPlayerService.isPlaying();
-                mediaPlayerService.pause();
+                mediaPlayerService.changeTrackRunningState();
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mediaPlayerService.setCurrentDuration(seekBar.getProgress());
-                if (wasPlaying) {
-                    mediaPlayerService.play();
-                }
+                mediaPlayerService.changeTrackRunningState();
             }
         });
         btnStateControl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mediaPlayerService.isPlaying()) {
-                    mediaPlayerService.pause();
-                } else {
-                    mediaPlayerService.play();
-                }
+                mediaPlayerService.changeTrackRunningState();
             }
         });
         findViewById(R.id.btn_previous).setOnClickListener(new View.OnClickListener() {
