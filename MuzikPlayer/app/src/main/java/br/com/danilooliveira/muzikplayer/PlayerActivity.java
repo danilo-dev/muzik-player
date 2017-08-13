@@ -135,7 +135,7 @@ public class PlayerActivity extends BaseActivity {
     private void changeRepeat(int repeatType) {
         switch (repeatType) {
             case Constants.TYPE_NO_REPEAT:
-                btnRepeat.setImageResource(R.drawable.ic_logo);
+                btnRepeat.setImageResource(R.drawable.ic_no_repeat);
                 break;
 
             case Constants.TYPE_REPEAT_CURRENT:
