@@ -48,7 +48,7 @@ public class PlayerActivity extends BaseActivity {
         btnStateControl = (ImageButton) findViewById(R.id.btn_state_control);
         btnRepeat = (ImageButton) findViewById(R.id.btn_repeat);
 
-        mViewPager.setOffscreenPageLimit(3);
+        mViewPager.setOffscreenPageLimit(1);
 
         trackSwipePager = new TrackSwipePager(getSupportFragmentManager());
 
@@ -79,12 +79,14 @@ public class PlayerActivity extends BaseActivity {
             @Override
             public void onClick(View view) {
                 mediaPlayerService.playPrevious();
+                mViewPager.setCurrentItem(mediaPlayerService.getCurrentPosition(), true);
             }
         });
         findViewById(R.id.btn_next).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mediaPlayerService.playNext();
+                mViewPager.setCurrentItem(mediaPlayerService.getCurrentPosition(), true);
             }
         });
         btnShuffle.setOnClickListener(new View.OnClickListener() {
@@ -121,6 +123,8 @@ public class PlayerActivity extends BaseActivity {
         } else {
             btnShuffle.setImageResource(R.drawable.ic_shuffle_normal);
         }
+        trackSwipePager.notifyDataSetChanged();
+        mViewPager.setCurrentItem(mediaPlayerService.getCurrentPosition(), false);
     }
 
     private void changeRepeat(int repeatType) {
@@ -140,7 +144,6 @@ public class PlayerActivity extends BaseActivity {
     }
 
     private void updateTrackInfo() {
-        mViewPager.setCurrentItem(mediaPlayerService.getCurrentPosition(), true);
         txtTotalDuration.setText(timeFormatter.format(mediaPlayerService.getTotalDuration()));
         seekTrackIndicator.setMax(mediaPlayerService.getMediaPlayer().getDuration());
     }
@@ -206,25 +209,26 @@ public class PlayerActivity extends BaseActivity {
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
+                // Do nothing...
             }
 
             @Override
             public void onPageSelected(int position) {
-                /*if (position > mediaPlayerService.getCurrentPosition()) {
+                if (position > mediaPlayerService.getCurrentPosition()) {
                     mediaPlayerService.playNext();
                 } else if (position < mediaPlayerService.getCurrentPosition()) {
                     mediaPlayerService.playPrevious();
-                }*/
+                }
             }
 
             @Override
             public void onPageScrollStateChanged(int state) {
-
+                // Do nothing...
             }
         });
 
         btnStateControl.setImageResource(mediaPlayerService.isPlaying()? R.drawable.ic_pause_circle : R.drawable.ic_play_circle);
+        mViewPager.setCurrentItem(mediaPlayerService.getCurrentPosition());
         updateTrackInfo();
         updateDurationInfo();
         changeShuffle(mediaPlayerService.isShuffle());

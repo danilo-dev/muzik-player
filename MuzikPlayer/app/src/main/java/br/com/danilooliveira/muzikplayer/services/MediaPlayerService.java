@@ -34,6 +34,7 @@ import br.com.danilooliveira.muzikplayer.utils.AppPreferences;
 import br.com.danilooliveira.muzikplayer.utils.Constants;
 
 public class MediaPlayerService extends MediaBrowserServiceCompat {
+    private MediaSessionCompat mediaSession;
     private MediaPlayer mediaPlayer;
 
     /**
@@ -54,7 +55,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     @Override
     public void onCreate() {
         super.onCreate();
-        MediaSessionCompat mediaSession = new MediaSessionCompat(this, MediaPlayerService.class.getSimpleName());
+        mediaSession = new MediaSessionCompat(this, MediaPlayerService.class.getSimpleName());
         mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
                 | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
 

@@ -51,9 +51,9 @@ public class TrackInfoFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        imgAlbumArt = (ImageView) view.findViewById(R.id.img_album_art);
-        txtTitle = (TextView) view.findViewById(R.id.txt_title);
-        txtArtist = (TextView) view.findViewById(R.id.txt_artist);
+        imgAlbumArt = view.findViewById(R.id.img_album_art);
+        txtTitle = view.findViewById(R.id.txt_title);
+        txtArtist = view.findViewById(R.id.txt_artist);
 
         txtTitle.setSelected(true);
         txtArtist.setSelected(true);
