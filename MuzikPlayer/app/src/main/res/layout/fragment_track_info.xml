@@ -4,7 +4,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="80dp"
+    android:paddingTop="70dp"
     >
     <ImageView
         android:id="@+id/img_album_art"
