@@ -76,8 +76,6 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             }
         });
 
-        MediaButtonReceiver.handleIntent(mediaSession, new Intent(Intent.ACTION_MEDIA_BUTTON));
-
         setSessionToken(mediaSession.getSessionToken());
 
         mediaPlayer = new MediaPlayer();
@@ -97,6 +95,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        MediaButtonReceiver.handleIntent(mediaSession, intent);
         if (intent.getAction() != null && !intent.getAction().isEmpty()) {
             Log.d(MediaPlayerService.class.getSimpleName(), "Action: " + intent.getAction());
             switch (intent.getAction()) {
