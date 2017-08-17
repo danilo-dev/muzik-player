@@ -42,6 +42,32 @@
             android:scrollbars="vertical"
             />
 
+        <LinearLayout
+            android:id="@android:id/empty"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="120dp"
+            tools:ignore="UseCompoundDrawables"
+            >
+            <ImageView
+                android:contentDescription="@string/cd_empty_track_list"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="16dp"
+                android:src="@drawable/ic_music_note"
+                />
+            <TextView
+                android:text="@string/info_empty_track_list"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:gravity="center_horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+        </LinearLayout>
+
         <include
             layout="@layout/player_bottom"
             />

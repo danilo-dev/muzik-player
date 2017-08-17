@@ -6,10 +6,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -30,18 +28,19 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import br.com.danilooliveira.muzikplayer.adapters.TrackAdapter;
+import br.com.danilooliveira.muzikplayer.database.TrackDatabase;
 import br.com.danilooliveira.muzikplayer.domain.Track;
 import br.com.danilooliveira.muzikplayer.interfaces.OnAdapterListener;
+import br.com.danilooliveira.muzikplayer.utils.AppPreferences;
 import br.com.danilooliveira.muzikplayer.utils.Constants;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private DrawerLayout mDrawerLayout;
-    private View playerBottomControl;
+    private View playerBottomControl, emptyState;
     private ImageView imgAlbumArt;
     private TextView txtCurrentMediaTitle;
     private TextView txtCurrentMediaArtist;
@@ -58,6 +57,7 @@ public class MainActivity extends BaseActivity
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         playerBottomControl = findViewById(R.id.player_bottom_control);
+        emptyState = findViewById(android.R.id.empty);
         imgAlbumArt = (ImageView) findViewById(R.id.img_album_art);
         txtCurrentMediaTitle = (TextView) findViewById(R.id.txt_current_track_title);
         txtCurrentMediaArtist = (TextView) findViewById(R.id.txt_current_track_artist);
@@ -194,37 +194,23 @@ public class MainActivity extends BaseActivity
                 }, Constants.REQUEST_PERMISSION_STORAGE);
     }
 
-    /**
-     * TODO: Implementar forma melhor e assíncrona para recuperação das faixas
-     */
-    @Deprecated
     private void findTrackFiles() {
         if (!checkStoragePermissions()) {
             return;
         }
 
-        Uri trackUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        TrackDatabase database = new TrackDatabase(this);
+        List<Track> trackList;
 
-        String[] trackColumns = {
-                MediaStore.Audio.Media._ID,
-                MediaStore.Audio.Media.TITLE,
-                MediaStore.Audio.Media.ARTIST,
-                MediaStore.Audio.Media.ALBUM_ID,
-                MediaStore.Audio.Media.DURATION,
-                MediaStore.Audio.Media.DATA
-        };
+        if (AppPreferences.with(this).isStorageScanned()) {
+            trackList = database.getList();
+        } else {
+            trackList = database.getTracksFromAndroidDB();
+        }
 
-        String trackConditions = MediaStore.Audio.Media.IS_MUSIC + "=1";
-        String trackOrder = MediaStore.Audio.Media.TITLE + " ASC";
-
-        List<Track> trackList = new ArrayList<>();
-
-        Cursor trackCursor = getContentResolver().query(trackUri, trackColumns, trackConditions, null, trackOrder);
-        if (trackCursor != null) {
-            while (trackCursor.moveToNext()) {
-                trackList.add(new Track(trackCursor));
-            }
-            trackCursor.close();
+        if (!trackList.isEmpty()) {
+            AppPreferences.with(this).setStorageScanned(true);
+            emptyState.setVisibility(View.GONE);
         }
 
         mTrackAdapter.setTrackList(trackList);

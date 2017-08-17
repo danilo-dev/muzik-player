@@ -29,7 +29,7 @@ public class Track implements Parcelable {
         data = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
     }
 
-    protected Track(Parcel in) {
+    private Track(Parcel in) {
         id = in.readString();
         title = in.readString();
         artist = in.readString();
@@ -50,6 +50,10 @@ public class Track implements Parcelable {
 
     public String getArtist() {
         return artist;
+    }
+
+    public String getAlbumId() {
+        return albumId;
     }
 
     public String getAlbumName() {

@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.danilooliveira.muzikplayer.domain.Track;
-import br.com.danilooliveira.muzikplayer.interfaces.TrackColumns;
 
 /**
  * Criado por Danilo de Oliveira (danilo.desenvolvedor@outlook.com) em 10/08/2017.
@@ -83,20 +82,21 @@ public class TrackDatabase extends Database {
         }
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(TrackColumns.ID, track.getId());
-        contentValues.put(TrackColumns.TITLE, track.getTitle());
-        contentValues.put(TrackColumns.ARTIST, track.getArtist());
-        contentValues.put(TrackColumns.ALBUM_NAME, track.getAlbumName());
-        contentValues.put(TrackColumns.ALBUM_ART, track.getAlbumArt());
-        contentValues.put(TrackColumns.DURATION, track.getDuration());
-        contentValues.put(TrackColumns.DATA, track.getData());
+        contentValues.put(MediaStore.Audio.Media._ID, track.getId());
+        contentValues.put(MediaStore.Audio.Media.TITLE, track.getTitle());
+        contentValues.put(MediaStore.Audio.Media.ARTIST, track.getArtist());
+        contentValues.put(MediaStore.Audio.Media.ALBUM_ID, track.getAlbumId());
+//        contentValues.put(MediaStore.Audio.Media.ALBUM, track.getAlbumName());
+        contentValues.put(MediaStore.Audio.AlbumColumns.ALBUM_ART, track.getAlbumArt());
+        contentValues.put(MediaStore.Audio.Media.DURATION, track.getDuration());
+        contentValues.put(MediaStore.Audio.Media.DATA, track.getData());
 
         getWritableDatabase().insert(TABLE_TRACK, null, contentValues);
         close();
     }
 
     private boolean exists(String id) {
-        Cursor cursor = getReadableDatabase().query(TABLE_TRACK, new String[] {TrackColumns.ID}, TrackColumns.ID + "=?",
+        Cursor cursor = getReadableDatabase().query(TABLE_TRACK, new String[] {MediaStore.Audio.Media._ID}, MediaStore.Audio.Media._ID + "=?",
                 new String[] {id}, null, null, null, "1");
 
         boolean exists = false;
@@ -107,5 +107,33 @@ public class TrackDatabase extends Database {
         close();
 
         return exists;
+    }
+
+    public List<Track> getList() {
+        String[] columns = new String[] {
+                MediaStore.Audio.Media._ID,
+                MediaStore.Audio.Media.TITLE,
+                MediaStore.Audio.Media.ARTIST,
+                MediaStore.Audio.Media.ALBUM_ID,
+//                MediaStore.Audio.Media.ALBUM_NAME,
+                MediaStore.Audio.AlbumColumns.ALBUM_ART,
+                MediaStore.Audio.Media.DURATION,
+                MediaStore.Audio.Media.DATA
+        };
+
+        Cursor cursor = getReadableDatabase().query(TABLE_TRACK, columns, null, null, null, null, null);
+
+        List<Track> trackList = new ArrayList<>();
+        if (cursor != null) {
+            Track track;
+            while (cursor.moveToNext()) {
+                track = new Track(cursor);
+                track.setAlbumArt(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.ALBUM_ART)));
+                trackList.add(track);
+            }
+            cursor.close();
+        }
+
+        return trackList;
     }
 }

@@ -41,6 +41,15 @@ public class AppPreferences {
         return ourInstance;
     }
 
+    public boolean isStorageScanned() {
+        return sharedPreferences.getBoolean(PreferencesKeys.STORAGE_SCANNED, false);
+    }
+
+    public AppPreferences setStorageScanned(boolean scanned) {
+        sharedPreferences.edit().putBoolean(PreferencesKeys.STORAGE_SCANNED, scanned).apply();
+        return ourInstance;
+    }
+
     private interface PreferencesKeys {
         /**
          * Chave que armazena o último tipo de repetição utilizado
@@ -58,5 +67,12 @@ public class AppPreferences {
          * false para ordem alfabética
          */
         String SHUFFLE_ENABLED = "shuffle_enable";
+
+        /**
+         * Chave que armazena um booleano para indicar se o
+         * armazenamento já foi escaneado e as músicas foram
+         * adicionadas ao banco de dados local
+         */
+        String STORAGE_SCANNED = "storage_scanned";
     }
 }
