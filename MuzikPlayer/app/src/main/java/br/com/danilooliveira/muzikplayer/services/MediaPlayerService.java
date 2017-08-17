@@ -80,6 +80,13 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
         mediaPlayer = new MediaPlayer();
         mediaPlayer.setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK);
+        mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
+                MediaPlayerService.this.mediaPlayer = null;
+                return false;
+            }
+        });
 
         queue = new ArrayList<>();
 
@@ -133,6 +140,9 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
     @Override
     public boolean onUnbind(Intent intent) {
+        if (mediaPlayer == null) {
+            return false;
+        }
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
         }
