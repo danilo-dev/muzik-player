@@ -13,8 +13,6 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.io.File;
-
 import br.com.danilooliveira.muzikplayer.R;
 import br.com.danilooliveira.muzikplayer.domain.Track;
 
@@ -22,6 +20,7 @@ import br.com.danilooliveira.muzikplayer.domain.Track;
  * Criado por Danilo de Oliveira (danilo.desenvolvedor@outlook.com) em 13/08/2017.
  */
 public class TrackInfoFragment extends Fragment {
+    private static final Uri.Builder uriBuilder = new Uri.Builder().scheme("file");
     private ImageView imgAlbumArt;
     private TextView txtTitle, txtArtist;
 
@@ -65,7 +64,7 @@ public class TrackInfoFragment extends Fragment {
         if (track != null) {
             if (track.getAlbumArt() != null) {
                 Picasso.with(mContext)
-                        .load(Uri.fromFile(new File(track.getAlbumArt())))
+                        .load(uriBuilder.path(track.getAlbumArt()).build())
                         .into(imgAlbumArt);
             } else {
                 imgAlbumArt.setImageResource(R.drawable.ic_placeholder_album_large);

@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
@@ -27,18 +26,20 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private static final int TYPE_BUTTON = 0;
     private static final int TYPE_TRACK = 1;
 
+    private static final Uri.Builder uriBuilder = new Uri.Builder();
+    private static final SimpleDateFormat timeFormatter = new SimpleDateFormat("mm:ss", Locale.getDefault());
+
     private OnAdapterListener audioClickListener;
     private LayoutInflater layoutInflater;
     private Picasso picasso;
-    private SimpleDateFormat timeFormatter;
 
     private List<Track> trackList;
 
     public TrackAdapter(Context context, OnAdapterListener audioClickListener) {
+        uriBuilder.scheme("file");
         this.audioClickListener = audioClickListener;
         layoutInflater = LayoutInflater.from(context);
         picasso = Picasso.with(context);
-        timeFormatter = new SimpleDateFormat("mm:ss", Locale.getDefault());
     }
 
     @Override
@@ -106,7 +107,8 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             if (track.getAlbumArt() == null) {
                 imgAlbumArt.setImageResource(R.drawable.ic_placeholder_album_small);
             } else {
-                picasso.load(Uri.fromFile(new File(track.getAlbumArt()))).into(imgAlbumArt);
+                picasso.load(uriBuilder.path(track.getAlbumArt()).build())
+                        .into(imgAlbumArt);
             }
 
             this.itemView.setOnClickListener(new View.OnClickListener() {

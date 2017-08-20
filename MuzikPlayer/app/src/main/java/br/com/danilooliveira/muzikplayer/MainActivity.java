@@ -27,7 +27,6 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.io.File;
 import java.util.List;
 
 import br.com.danilooliveira.muzikplayer.adapters.TrackAdapter;
@@ -222,6 +221,8 @@ public class MainActivity extends BaseActivity
     @Override
     public BroadcastReceiver onTrackChanged() {
         return new BroadcastReceiver() {
+            private final Uri.Builder uriBuilder = new Uri.Builder().scheme("file");
+
             @Override
             public void onReceive(Context context, Intent intent) {
                 Track track = intent.getParcelableExtra(Constants.BUNDLE_TRACK);
@@ -232,7 +233,7 @@ public class MainActivity extends BaseActivity
 
                 if (track.getAlbumArt() != null) {
                     Picasso.with(context)
-                            .load(Uri.fromFile(new File(track.getAlbumArt())))
+                            .load(uriBuilder.path(track.getAlbumArt()).build())
                             .into(imgAlbumArt);
                 } else {
                     imgAlbumArt.setImageResource(R.drawable.ic_placeholder_album_small);
