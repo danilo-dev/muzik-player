@@ -117,6 +117,14 @@ public class PlayerActivity extends BaseActivity {
         }, 0, 17);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (timer != null) {
+            timer.cancel();
+        }
+    }
+
     private void changeShuffle(boolean isShuffle) {
         if (isShuffle) {
             btnShuffle.setImageResource(R.drawable.ic_shuffle_active);

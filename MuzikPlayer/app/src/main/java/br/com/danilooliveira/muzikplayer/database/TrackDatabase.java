@@ -121,7 +121,7 @@ public class TrackDatabase extends Database {
                 MediaStore.Audio.Media.DATA
         };
 
-        Cursor cursor = getReadableDatabase().query(TABLE_TRACK, columns, null, null, null, null, null);
+        Cursor cursor = getReadableDatabase().query(TABLE_TRACK, columns, null, null, null, null, MediaStore.Audio.Media.TITLE + " ASC");
 
         List<Track> trackList = new ArrayList<>();
         if (cursor != null) {
@@ -133,6 +133,7 @@ public class TrackDatabase extends Database {
             }
             cursor.close();
         }
+        close();
 
         return trackList;
     }

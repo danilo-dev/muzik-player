@@ -143,10 +143,15 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         if (mediaPlayer == null) {
             return false;
         }
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
+        try {
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+            }
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        } finally {
+            mediaPlayer.release();
         }
-        mediaPlayer.release();
         return false;
     }
 
@@ -462,7 +467,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
             notification = new NotificationCompat.Builder(context);
             notification
-                    .setContentIntent(PendingIntent.getService(context, 0, openPlayerIntent, 0))
+                    .setContentIntent(PendingIntent.getActivity(context, 0, openPlayerIntent, 0))
                     .setDeleteIntent(PendingIntent.getService(context, 0, playPauseIntent, 0))
 
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
