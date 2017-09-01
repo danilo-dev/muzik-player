@@ -110,7 +110,27 @@ public class TrackDatabase extends Database {
     }
 
     public List<Track> getList() {
-        String[] columns = new String[] {
+        Cursor cursor = getReadableDatabase().query(TABLE_TRACK, getTrackColumns(), null, null,
+                null, null, MediaStore.Audio.Media.TITLE + " ASC");
+
+        List<Track> trackList = new ArrayList<>();
+        if (cursor != null) {
+            Track track;
+            while (cursor.moveToNext()) {
+                track = new Track(cursor);
+                track.setAlbumArt(cursor.getString(cursor
+                        .getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.ALBUM_ART)));
+                trackList.add(track);
+            }
+            cursor.close();
+        }
+        close();
+
+        return trackList;
+    }
+
+    private String[] getTrackColumns() {
+        return new String[] {
                 MediaStore.Audio.Media._ID,
                 MediaStore.Audio.Media.TITLE,
                 MediaStore.Audio.Media.ARTIST,
@@ -120,21 +140,5 @@ public class TrackDatabase extends Database {
                 MediaStore.Audio.Media.DURATION,
                 MediaStore.Audio.Media.DATA
         };
-
-        Cursor cursor = getReadableDatabase().query(TABLE_TRACK, columns, null, null, null, null, MediaStore.Audio.Media.TITLE + " ASC");
-
-        List<Track> trackList = new ArrayList<>();
-        if (cursor != null) {
-            Track track;
-            while (cursor.moveToNext()) {
-                track = new Track(cursor);
-                track.setAlbumArt(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.ALBUM_ART)));
-                trackList.add(track);
-            }
-            cursor.close();
-        }
-        close();
-
-        return trackList;
     }
 }
