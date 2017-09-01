@@ -12,6 +12,9 @@
     <string name="btn_previous_track">Anterior</string>
     <string name="btn_shuffle">Aleatório</string>
 
+    <string name="txt_shuffle_info_plural">%1$d músicas &#8226; %2$s</string>
+    <string name="txt_shuffle_info_singular">1 música &#8226; %s</string>
+
     <string name="dialog_permission_storage_title">Permissão de armazenamento</string>
     <string name="dialog_permission_storage_message">Para que possamos começar as coisas por aqui,
         precisamos que você nos dê permissão de leitura e gravação no armazenamento.</string>
