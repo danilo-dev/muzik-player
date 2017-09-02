@@ -154,6 +154,7 @@ public class PlayerActivity extends BaseActivity {
     private void updateTrackInfo() {
         txtTotalDuration.setText(timeFormatter.format(mediaPlayerService.getTotalDuration()));
         seekTrackIndicator.setMax(mediaPlayerService.getMediaPlayer().getDuration());
+        mViewPager.setCurrentItem(mediaPlayerService.getCurrentPosition(), true);
     }
 
     private void updateDurationInfo() {
@@ -236,7 +237,6 @@ public class PlayerActivity extends BaseActivity {
         });
 
         btnStateControl.setImageResource(mediaPlayerService.isPlaying()? R.drawable.ic_pause_circle : R.drawable.ic_play_circle);
-        mViewPager.setCurrentItem(mediaPlayerService.getCurrentPosition());
         updateTrackInfo();
         updateDurationInfo();
         changeShuffle(mediaPlayerService.isShuffle());
