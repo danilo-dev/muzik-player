@@ -79,15 +79,13 @@ public class PlayerActivity extends BaseActivity {
         findViewById(R.id.btn_previous).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mediaPlayerService.playPrevious();
-                mViewPager.setCurrentItem(mediaPlayerService.getCurrentPosition(), true);
+                mediaPlayerService.playPrevious(true);
             }
         });
         findViewById(R.id.btn_next).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mediaPlayerService.playNext();
-                mViewPager.setCurrentItem(mediaPlayerService.getCurrentPosition(), true);
             }
         });
         btnShuffle.setOnClickListener(new View.OnClickListener() {
@@ -227,7 +225,7 @@ public class PlayerActivity extends BaseActivity {
                 if (position > mediaPlayerService.getCurrentPosition()) {
                     mediaPlayerService.playNext();
                 } else if (position < mediaPlayerService.getCurrentPosition()) {
-                    mediaPlayerService.playPrevious();
+                    mediaPlayerService.playPrevious(false);
                 }
             }
 

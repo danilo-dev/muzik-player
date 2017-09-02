@@ -106,7 +106,7 @@ public class MainActivity extends BaseActivity
         btnPlayerBottomPrevious.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mediaPlayerService.playPrevious();
+                mediaPlayerService.playPrevious(true);
             }
         });
         btnPlayerBottomNext.setOnClickListener(new View.OnClickListener() {

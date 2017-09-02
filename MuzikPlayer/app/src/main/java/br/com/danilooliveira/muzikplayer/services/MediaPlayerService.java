@@ -34,6 +34,13 @@ import br.com.danilooliveira.muzikplayer.utils.AppPreferences;
 import br.com.danilooliveira.muzikplayer.utils.Constants;
 
 public class MediaPlayerService extends MediaBrowserServiceCompat {
+    /**
+     * Duração mínima reproduzida da música para que ela seja
+     * reiniciada ao voltar uma música
+     * @see MediaPlayerService#playPrevious(boolean)
+     */
+    private static final int DEFAULT_MIN_TIME_TO_RESTART = 2 * 1000;
+
     private MediaSessionCompat mediaSession;
     private MediaPlayer mediaPlayer;
 
@@ -115,7 +122,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                     break;
 
                 case Constants.ACTION_PREVIOUS_TRACK:
-                    playPrevious();
+                    playPrevious(true);
                     break;
 
                 default:
@@ -237,9 +244,20 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
      * Se estiver no modo normal {@link MediaPlayerService#isShuffle} e
      * voltar a uma faixa antes que a primeira (index = 0), reproduz a
      * última (index = list.size() - 1)
+     *
+     * @param defaultBehavior true para verificar se a música deve
+     *                        ser reiniciada ou se a música anterior
+     *                        deve ser tocada, dependendo da duração
+     *                        já reproduzida pela música atual
+     *                        @see MediaPlayerService#DEFAULT_MIN_TIME_TO_RESTART
      */
-    public void playPrevious() {
+    public void playPrevious(boolean defaultBehavior) {
         Track track;
+
+        if (defaultBehavior && getCurrentDuration() >= DEFAULT_MIN_TIME_TO_RESTART) {
+            setCurrentDuration(0);
+            return;
+        }
 
         currentPosition--;
 
@@ -403,16 +421,16 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     }
 
     /**
-     * Retorna a duração formatada já reproduzida da faixa
-     * @return  String
+     * Retorna a duração já reproduzida da faixa
+     * @return  int
      */
     public int getCurrentDuration() {
         return mediaPlayer.getCurrentPosition();
     }
 
     /**
-     * Retorna a duração total formatada da faixa que está tocando
-     * @return  String
+     * Retorna a duração total da faixa que está tocando
+     * @return  int
      */
     public int getTotalDuration() {
         return mediaPlayer.getDuration();
