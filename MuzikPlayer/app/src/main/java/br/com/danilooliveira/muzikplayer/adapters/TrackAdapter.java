@@ -97,10 +97,10 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
         TrackViewHolder(View itemView) {
             super(itemView);
-            imgAlbumArt = itemView.findViewById(R.id.img_album_art);
-            txtTitle = itemView.findViewById(R.id.txt_title);
-            txtArtist = itemView.findViewById(R.id.txt_artist);
-            txtDuration = itemView.findViewById(R.id.txt_duration);
+            imgAlbumArt = (ImageView) itemView.findViewById(R.id.img_album_art);
+            txtTitle = (TextView) itemView.findViewById(R.id.txt_title);
+            txtArtist = (TextView) itemView.findViewById(R.id.txt_artist);
+            txtDuration = (TextView) itemView.findViewById(R.id.txt_duration);
         }
 
         void onBind(final Track track) {
@@ -131,7 +131,7 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         ButtonShuffleViewHolder(View itemView) {
             super(itemView);
 
-            txtShuffleInfo = itemView.findViewById(R.id.txt_shuffle_info);
+            txtShuffleInfo = (TextView) itemView.findViewById(R.id.txt_shuffle_info);
         }
 
         void onBind() {

@@ -1,6 +1,7 @@
 package br.com.danilooliveira.muzikplayer.activities;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -31,10 +32,9 @@ import java.util.List;
 
 import br.com.danilooliveira.muzikplayer.R;
 import br.com.danilooliveira.muzikplayer.adapters.TrackAdapter;
-import br.com.danilooliveira.muzikplayer.database.TrackDatabase;
+import br.com.danilooliveira.muzikplayer.asynctasks.TrackFinderTask;
 import br.com.danilooliveira.muzikplayer.domain.Track;
 import br.com.danilooliveira.muzikplayer.interfaces.OnAdapterListener;
-import br.com.danilooliveira.muzikplayer.utils.AppPreferences;
 import br.com.danilooliveira.muzikplayer.utils.Constants;
 
 public class MainActivity extends BaseActivity
@@ -199,24 +199,23 @@ public class MainActivity extends BaseActivity
             return;
         }
 
-        TrackDatabase database = new TrackDatabase(this);
-        List<Track> trackList;
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage(getString(R.string.info_getting_track_list));
+        progressDialog.show();
+        new TrackFinderTask(this, new TrackFinderTask.OnCompleteListener() {
+            @Override
+            public void onComplete(List<Track> trackList) {
+                progressDialog.dismiss();
 
-        if (AppPreferences.with(this).isStorageScanned()) {
-            trackList = database.getList();
-        } else {
-            trackList = database.getTracksFromAndroidDB();
-        }
-
-        if (!trackList.isEmpty()) {
-            AppPreferences.with(this).setStorageScanned(true);
-            emptyState.setVisibility(View.GONE);
-        }
-
-        mTrackAdapter.setTrackList(trackList);
-        if (mediaPlayerService != null) {
-            mediaPlayerService.setTrackList(trackList);
-        }
+                if (!trackList.isEmpty()) {
+                    emptyState.setVisibility(View.GONE);
+                }
+                mTrackAdapter.setTrackList(trackList);
+                if (mediaPlayerService != null) {
+                    mediaPlayerService.setTrackList(trackList);
+                }
+            }
+        }).execute();
     }
 
     @Override
