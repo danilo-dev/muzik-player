@@ -1,4 +1,4 @@
-package br.com.danilooliveira.muzikplayer;
+package br.com.danilooliveira.muzikplayer.activities;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;

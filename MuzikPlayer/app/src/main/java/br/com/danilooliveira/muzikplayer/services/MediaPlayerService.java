@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import br.com.danilooliveira.muzikplayer.MainActivity;
+import br.com.danilooliveira.muzikplayer.activities.MainActivity;
 import br.com.danilooliveira.muzikplayer.R;
 import br.com.danilooliveira.muzikplayer.domain.Track;
 import br.com.danilooliveira.muzikplayer.utils.AppPreferences;

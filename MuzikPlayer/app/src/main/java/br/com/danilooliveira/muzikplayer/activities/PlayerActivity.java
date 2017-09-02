@@ -1,4 +1,4 @@
-package br.com.danilooliveira.muzikplayer;
+package br.com.danilooliveira.muzikplayer.activities;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -19,6 +19,7 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import br.com.danilooliveira.muzikplayer.R;
 import br.com.danilooliveira.muzikplayer.fragments.TrackInfoFragment;
 import br.com.danilooliveira.muzikplayer.utils.Constants;
 

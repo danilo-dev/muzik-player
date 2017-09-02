@@ -1,4 +1,4 @@
-package br.com.danilooliveira.muzikplayer;
+package br.com.danilooliveira.muzikplayer.activities;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -29,6 +29,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import br.com.danilooliveira.muzikplayer.R;
 import br.com.danilooliveira.muzikplayer.adapters.TrackAdapter;
 import br.com.danilooliveira.muzikplayer.database.TrackDatabase;
 import br.com.danilooliveira.muzikplayer.domain.Track;
