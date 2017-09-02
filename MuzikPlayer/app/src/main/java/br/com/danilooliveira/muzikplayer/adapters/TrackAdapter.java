@@ -49,23 +49,23 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
-            case TYPE_BUTTON:
-                return new ButtonShuffleViewHolder(layoutInflater.inflate(R.layout.adapter_item_shuffle, parent, false));
+            case TYPE_TRACK:
+                return new TrackViewHolder(layoutInflater.inflate(R.layout.adapter_track, parent, false));
 
             default:
-                return new TrackViewHolder(layoutInflater.inflate(R.layout.adapter_track, parent, false));
+                return new ButtonShuffleViewHolder(layoutInflater.inflate(R.layout.adapter_item_shuffle, parent, false));
         }
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         switch (getItemViewType(position)) {
-            case TYPE_BUTTON:
-                ((ButtonShuffleViewHolder) holder).onBind();
-                break;
-
             case TYPE_TRACK:
                 ((TrackViewHolder) holder).onBind(trackList.get(--position));
+                break;
+
+            case TYPE_BUTTON:
+                ((ButtonShuffleViewHolder) holder).onBind();
                 break;
         }
     }
@@ -80,6 +80,21 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         return position == 0 ? TYPE_BUTTON : TYPE_TRACK;
     }
 
+    public void setSelectedTrack(Track track) {
+        // Desseleciona a última faixa
+        for (Track t : trackList) {
+            if (t.isSelected()) {
+                t.setSelected(false);
+                notifyItemChanged(trackList.indexOf(t) + 1);
+                break;
+            }
+        }
+
+        // Seleciona a faixa atual
+        track.setSelected(true);
+        notifyItemChanged(trackList.indexOf(track) + 1);
+    }
+
     public List<Track> getTrackList() {
         return trackList;
     }
@@ -90,6 +105,7 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     private class TrackViewHolder extends RecyclerView.ViewHolder {
+        private View container;
         private ImageView imgAlbumArt;
         private TextView txtTitle;
         private TextView txtArtist;
@@ -97,6 +113,7 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
         TrackViewHolder(View itemView) {
             super(itemView);
+            container = itemView.findViewById(R.id.container);
             imgAlbumArt = (ImageView) itemView.findViewById(R.id.img_album_art);
             txtTitle = (TextView) itemView.findViewById(R.id.txt_title);
             txtArtist = (TextView) itemView.findViewById(R.id.txt_artist);
@@ -107,6 +124,14 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             txtTitle.setText(track.getTitle());
             txtArtist.setText(track.getArtist());
             txtDuration.setText(timeFormatter.format(track.getDuration()));
+
+            if (track.isSelected()) {
+                itemView.setBackgroundColor(resources.getColor(R.color.colorPrimaryDark));
+                container.setBackgroundColor(resources.getColor(R.color.colorPrimary));
+            } else {
+                itemView.setBackgroundColor(resources.getColor(R.color.background_primary));
+                container.setBackgroundColor(resources.getColor(R.color.background_secondary));
+            }
 
             if (track.getAlbumArt() == null) {
                 imgAlbumArt.setImageResource(R.drawable.ic_placeholder_album_small);

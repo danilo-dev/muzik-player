@@ -11,6 +11,7 @@
     android:theme="@style/ThemeOverlay.AppCompat.Dark"
     >
     <RelativeLayout
+        android:id="@+id/container"
         android:background="@color/background_secondary"
         android:foreground="?attr/selectableItemBackground"
         android:layout_width="match_parent"

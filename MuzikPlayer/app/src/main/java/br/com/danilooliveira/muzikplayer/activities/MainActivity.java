@@ -120,7 +120,7 @@ public class MainActivity extends BaseActivity
     }
 
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         mDrawerLayout.closeDrawer(GravityCompat.START, true);
         return true;
     }
@@ -238,6 +238,8 @@ public class MainActivity extends BaseActivity
                 } else {
                     imgAlbumArt.setImageResource(R.drawable.ic_placeholder_album_small);
                 }
+
+                mTrackAdapter.setSelectedTrack(track);
             }
         };
     }

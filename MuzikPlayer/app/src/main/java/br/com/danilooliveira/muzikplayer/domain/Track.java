@@ -19,6 +19,10 @@ public class Track implements Parcelable {
     private String albumArt;
     private int duration;
     private String data;
+    /**
+     * Indica se a música está selecionada
+     */
+    private boolean isSelected = false;
 
     public Track(Cursor cursor) {
         id = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
@@ -38,6 +42,7 @@ public class Track implements Parcelable {
         albumArt = in.readString();
         duration = in.readInt();
         data = in.readString();
+        isSelected = in.readByte() != 0;
     }
 
     public String getId() {
@@ -77,6 +82,22 @@ public class Track implements Parcelable {
         return data;
     }
 
+    public boolean isSelected() {
+        return isSelected;
+    }
+
+    public void setSelected(boolean selected) {
+        isSelected = selected;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj != null
+                && obj instanceof Track
+                && ((Track) obj).getId().equals(this.id);
+
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -92,6 +113,7 @@ public class Track implements Parcelable {
         parcel.writeString(albumArt);
         parcel.writeInt(duration);
         parcel.writeString(data);
+        parcel.writeByte((byte) (isSelected ? 1 : 0));
     }
 
     public static final Creator<Track> CREATOR = new Creator<Track>() {
