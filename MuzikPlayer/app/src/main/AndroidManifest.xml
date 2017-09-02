@@ -39,12 +39,13 @@
             android:name=".activities.PlayerActivity"
             android:screenOrientation="portrait"
             android:launchMode="singleTask"
+            android:parentActivityName=".activities.MainActivity"
             />
 
         <activity
             android:name=".activities.SettingsActivity"
-            android:screenOrientation="portrait"
             android:label="@string/title_settings"
+            android:screenOrientation="portrait"
             android:parentActivityName=".activities.MainActivity"
             />
     </application>

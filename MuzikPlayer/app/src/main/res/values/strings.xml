@@ -23,6 +23,7 @@
         precisamos que você nos dê permissão de leitura e gravação no armazenamento.</string>
     <string name="dialog_permission_storage_btn_ok">Vamos lá!</string>
 
+    <string name="action_queue">Fila</string>
     <string name="action_search">Pesquisar</string>
 
     <string name="cd_album_art">Capa do álbum</string>
