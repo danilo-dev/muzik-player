@@ -21,6 +21,9 @@ public class TrackDatabase extends Database {
     }
 
     public List<Track> getTracksFromAndroidDB() {
+        // Limpa todos os registros da tabela de músicas do banco de dados local
+        clear();
+
         Uri trackUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         Uri albumUri = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI;
 
@@ -53,10 +56,6 @@ public class TrackDatabase extends Database {
             while (trackCursor.moveToNext()) {
                 track = new Track(trackCursor);
 
-                if (exists(track.getId())) {
-                    break;
-                }
-
                 albumArgs = trackCursor.getString(trackCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
 
                 albumCursor = mContext.getContentResolver().query(albumUri, albumColumns, albumConditions, new String[] {albumArgs}, null);
@@ -77,10 +76,6 @@ public class TrackDatabase extends Database {
     }
 
     private void add(Track track) {
-        if (exists(track.getId())) {
-            return;
-        }
-
         ContentValues contentValues = new ContentValues();
         contentValues.put(MediaStore.Audio.Media._ID, track.getId());
         contentValues.put(MediaStore.Audio.Media.TITLE, track.getTitle());
@@ -93,20 +88,6 @@ public class TrackDatabase extends Database {
 
         getWritableDatabase().insert(TABLE_TRACK, null, contentValues);
         close();
-    }
-
-    private boolean exists(String id) {
-        Cursor cursor = getReadableDatabase().query(TABLE_TRACK, new String[] {MediaStore.Audio.Media._ID}, MediaStore.Audio.Media._ID + "=?",
-                new String[] {id}, null, null, null, "1");
-
-        boolean exists = false;
-        if (cursor != null) {
-            exists = cursor.moveToNext();
-            cursor.close();
-        }
-        close();
-
-        return exists;
     }
 
     public List<Track> getList() {
@@ -127,6 +108,10 @@ public class TrackDatabase extends Database {
         close();
 
         return trackList;
+    }
+
+    public void clear() {
+        getWritableDatabase().delete(TABLE_TRACK, null, null);
     }
 
     private String[] getTrackColumns() {

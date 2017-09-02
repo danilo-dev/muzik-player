@@ -40,6 +40,13 @@
             android:screenOrientation="portrait"
             android:launchMode="singleTask"
             />
+
+        <activity
+            android:name=".activities.SettingsActivity"
+            android:screenOrientation="portrait"
+            android:label="@string/title_settings"
+            android:parentActivityName=".activities.MainActivity"
+            />
     </application>
 
 </manifest>

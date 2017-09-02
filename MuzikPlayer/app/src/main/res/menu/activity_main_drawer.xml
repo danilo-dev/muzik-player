@@ -34,8 +34,8 @@
     </item>-->
 
     <item
-        android:id="@+id/nav_settings"
-        android:title="Configurações"
+        android:id="@+id/action_settings"
+        android:title="@string/title_settings"
         android:icon="@drawable/ic_settings"
         />
 </menu>

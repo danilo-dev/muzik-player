@@ -1,5 +1,6 @@
 package br.com.danilooliveira.muzikplayer.services;
 
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -43,6 +44,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
     private MediaSessionCompat mediaSession;
     private MediaPlayer mediaPlayer;
+    private AppNotification appNotification;
 
     /**
      * Faixas ordenadas alfabeticamente
@@ -171,18 +173,27 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PAUSE));
-            new AppNotification(this, mediaSession)
+            appNotification = new AppNotification(this, mediaSession)
                     .setTrack(getCurrentTrack())
                     .setActionPlay()
                     .show();
         } else {
             mediaPlayer.start();
             LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PLAY));
-            new AppNotification(this, mediaSession)
+            appNotification = new AppNotification(this, mediaSession)
                     .setTrack(getCurrentTrack())
                     .setActionPause()
                     .show();
         }
+    }
+
+    public void stop() {
+        appNotification.cancelNotification();
+        if (mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
+        }
+        mediaPlayer.stop();
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_TRACK_LIST_CHANGED));
     }
 
     /**
@@ -221,7 +232,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
             LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PLAY));
 
-            new AppNotification(this, mediaSession)
+            appNotification = new AppNotification(this, mediaSession)
                     .setTrack(track)
                     .setActionPause()
                     .show();
@@ -448,6 +459,10 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         return mediaPlayer;
     }
 
+    public List<Track> getTrackList() {
+        return trackList;
+    }
+
     public void setTrackList(List<Track> trackList) {
         this.trackList = trackList;
     }
@@ -524,8 +539,14 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         }
 
         AppNotification show() {
-            startForeground(NOTIFICATION_ID, notification.build());
+            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            manager.notify(NOTIFICATION_ID, notification.build());
             return this;
+        }
+
+        void cancelNotification() {
+            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            manager.cancel(NOTIFICATION_ID);
         }
     }
 

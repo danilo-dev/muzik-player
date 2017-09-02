@@ -160,7 +160,7 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
 
         void onBind() {
-            int itemCount = getItemCount();
+            int itemCount = getItemCount() - 1;
             long timeCount = 0;
 
             for (Track t : trackList) {

@@ -172,6 +172,16 @@ public class PlayerActivity extends BaseActivity {
     }
 
     @Override
+    protected BroadcastReceiver onTrackListChanged() {
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                // Do nothing...
+            }
+        };
+    }
+
+    @Override
     protected BroadcastReceiver onPauseTrack() {
         return new BroadcastReceiver() {
             @Override

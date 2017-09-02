@@ -27,27 +27,25 @@ public class TrackFinderTask extends AsyncTask<Void, Integer, List<Track>> {
     private final TrackDatabase database;
     private final AppPreferences appPreferences;
 
-    private final boolean isStorageScanned;
+    private final boolean scanStorage;
 
-    public TrackFinderTask(Context context, OnCompleteListener listener) {
+    public TrackFinderTask(Context context, boolean forceScan, OnCompleteListener listener) {
         this.listener = listener;
 
         database = new TrackDatabase(context);
         appPreferences = AppPreferences.with(context);
 
-        isStorageScanned = appPreferences.isStorageScanned();
+        scanStorage = forceScan || !appPreferences.isStorageScanned();
     }
 
     @Override
     protected List<Track> doInBackground(Void... voids) {
-        if (isStorageScanned) {
+        if (!scanStorage) {
             return database.getList();
         } else {
             List<Track> trackList = database.getTracksFromAndroidDB();
 
-            if (!trackList.isEmpty()) {
-                appPreferences.setStorageScanned(true);
-            }
+            appPreferences.setStorageScanned(!trackList.isEmpty());
 
             return trackList;
         }

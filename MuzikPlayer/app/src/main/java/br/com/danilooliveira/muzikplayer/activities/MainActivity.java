@@ -37,8 +37,7 @@ import br.com.danilooliveira.muzikplayer.domain.Track;
 import br.com.danilooliveira.muzikplayer.interfaces.OnAdapterListener;
 import br.com.danilooliveira.muzikplayer.utils.Constants;
 
-public class MainActivity extends BaseActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
     private DrawerLayout mDrawerLayout;
     private View playerBottomControl, emptyState;
     private ImageView imgAlbumArt;
@@ -121,6 +120,11 @@ public class MainActivity extends BaseActivity
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                startActivity(new Intent(this, SettingsActivity.class));
+                break;
+        }
         mDrawerLayout.closeDrawer(GravityCompat.START, true);
         return true;
     }
@@ -202,7 +206,7 @@ public class MainActivity extends BaseActivity
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.info_getting_track_list));
         progressDialog.show();
-        new TrackFinderTask(this, new TrackFinderTask.OnCompleteListener() {
+        new TrackFinderTask(this, false, new TrackFinderTask.OnCompleteListener() {
             @Override
             public void onComplete(List<Track> trackList) {
                 progressDialog.dismiss();
@@ -280,6 +284,17 @@ public class MainActivity extends BaseActivity
             @Override
             public void onReceive(Context context, Intent intent) {
                 // Do nothing...
+            }
+        };
+    }
+
+    @Override
+    protected BroadcastReceiver onTrackListChanged() {
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                playerBottomControl.setVisibility(View.GONE);
+                mTrackAdapter.setTrackList(mediaPlayerService.getTrackList());
             }
         };
     }

@@ -24,6 +24,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     private BroadcastReceiver onRepeatTypeChangedReceiver;
     private BroadcastReceiver onShuffleChangedReceiver;
     private BroadcastReceiver onTrackChangedReceiver;
+    private BroadcastReceiver onTrackListChangedReceiver;
 
     protected MediaPlayerService mediaPlayerService;
 
@@ -51,6 +52,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         onRepeatTypeChangedReceiver = onRepeatTypeChanged();
         onShuffleChangedReceiver = onShuffleChanged();
         onTrackChangedReceiver = onTrackChanged();
+        onTrackListChangedReceiver = onTrackListChanged();
     }
 
     @Override
@@ -71,6 +73,8 @@ public abstract class BaseActivity extends AppCompatActivity {
                 .registerReceiver(onShuffleChangedReceiver, new IntentFilter(Constants.ACTION_SHUFFLE_CHANGED));
         LocalBroadcastManager.getInstance(this)
                 .registerReceiver(onTrackChangedReceiver, new IntentFilter(Constants.ACTION_TRACK_CHANGED));
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(onTrackListChangedReceiver, new IntentFilter(Constants.ACTION_TRACK_LIST_CHANGED));
     }
 
     @Override
@@ -82,6 +86,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(onRepeatTypeChangedReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(onShuffleChangedReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(onTrackChangedReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(onTrackListChangedReceiver);
         super.onDestroy();
     }
 
@@ -94,6 +99,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected abstract BroadcastReceiver onShuffleChanged();
 
     protected abstract BroadcastReceiver onTrackChanged();
+
+    protected abstract BroadcastReceiver onTrackListChanged();
 
     protected abstract void onServiceConnected();
 }
