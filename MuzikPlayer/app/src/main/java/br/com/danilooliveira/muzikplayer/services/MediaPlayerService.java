@@ -1,10 +1,6 @@
 package br.com.danilooliveira.muzikplayer.services;
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Bundle;
@@ -13,14 +9,12 @@ import android.os.PowerManager;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaBrowserServiceCompat;
 import android.support.v4.media.session.MediaButtonReceiver;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import java.io.IOException;
@@ -28,9 +22,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import br.com.danilooliveira.muzikplayer.activities.MainActivity;
-import br.com.danilooliveira.muzikplayer.R;
 import br.com.danilooliveira.muzikplayer.domain.Track;
+import br.com.danilooliveira.muzikplayer.utils.AppNotification;
 import br.com.danilooliveira.muzikplayer.utils.AppPreferences;
 import br.com.danilooliveira.muzikplayer.utils.Constants;
 
@@ -170,20 +163,20 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
      * em que foi dado pause
      */
     public void changeTrackRunningState() {
-        if (mediaPlayer.isPlaying()) {
+        boolean isPlaying = mediaPlayer.isPlaying();
+
+        appNotification = new AppNotification.Builder(this, mediaSession)
+                // O valor de isPlaying vai se inverter nas próximas linhas
+                .setDefault(getCurrentTrack(), !isPlaying)
+                .build()
+                .show();
+
+        if (isPlaying) {
             mediaPlayer.pause();
             LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PAUSE));
-            appNotification = new AppNotification(this, mediaSession)
-                    .setTrack(getCurrentTrack())
-                    .setActionPlay()
-                    .show();
         } else {
             mediaPlayer.start();
             LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PLAY));
-            appNotification = new AppNotification(this, mediaSession)
-                    .setTrack(getCurrentTrack())
-                    .setActionPause()
-                    .show();
         }
     }
 
@@ -232,9 +225,9 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
             LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PLAY));
 
-            appNotification = new AppNotification(this, mediaSession)
-                    .setTrack(track)
-                    .setActionPause()
+            appNotification = new AppNotification.Builder(this, mediaSession)
+                    .setDefault(track, true)
+                    .build()
                     .show();
 
             mediaPlayer.start();
@@ -475,79 +468,6 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         queue.addAll(trackList);
 
         Collections.shuffle(queue);
-    }
-
-    private class AppNotification {
-        private static final int NOTIFICATION_ID = 10;
-
-        private NotificationCompat.Builder notification;
-
-        private PendingIntent playPausePendingIntent;
-
-        AppNotification(Context context, MediaSessionCompat mediaSession) {
-            Intent nextIntent = new Intent(context, MediaPlayerService.class);
-            nextIntent.setAction(Constants.ACTION_NEXT_TRACK);
-
-            Intent previousIntent = new Intent(context, MediaPlayerService.class);
-            previousIntent.setAction(Constants.ACTION_PREVIOUS_TRACK);
-
-            Intent openPlayerIntent = new Intent(context, MainActivity.class);
-
-            Intent playPauseIntent = new Intent(context, MediaPlayerService.class);
-            playPauseIntent.setAction(Constants.ACTION_PLAY_PAUSE);
-
-            playPausePendingIntent = PendingIntent.getService(context, 0, playPauseIntent, 0);
-
-            notification = new NotificationCompat.Builder(context);
-            notification
-                    .setContentIntent(PendingIntent.getActivity(context, 0, openPlayerIntent, 0))
-                    .setDeleteIntent(PendingIntent.getService(context, 0, playPauseIntent, 0))
-
-                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                    .setSmallIcon(R.drawable.ic_logo_flat_white)
-                    .setColor(ContextCompat.getColor(context, R.color.colorAccent))
-
-                    .addAction(R.drawable.ic_skip_previous, getString(R.string.btn_previous_track),
-                            PendingIntent.getService(context, 0, previousIntent, 0))
-
-                    .addAction(R.drawable.ic_skip_next, getString(R.string.btn_next_track),
-                            PendingIntent.getService(context, 0, nextIntent, 0))
-
-                    .setStyle(new NotificationCompat.MediaStyle()
-                            .setMediaSession(mediaSession.getSessionToken())
-                            .setShowActionsInCompactView(0, 2, 1)
-                            .setCancelButtonIntent(PendingIntent.getService(context, 0, playPauseIntent, 0)));
-        }
-
-        AppNotification setTrack(Track track) {
-            notification.setContentTitle(track.getTitle())
-                    .setContentText(track.getArtist())
-                    .setLargeIcon(BitmapFactory.decodeFile(track.getAlbumArt()));
-            return this;
-        }
-
-        AppNotification setActionPlay() {
-            notification.addAction(R.drawable.ic_play, getString(R.string.btn_play),
-                    playPausePendingIntent);
-            return this;
-        }
-
-        AppNotification setActionPause() {
-            notification.addAction(R.drawable.ic_pause, getString(R.string.btn_pause),
-                    playPausePendingIntent);
-            return this;
-        }
-
-        AppNotification show() {
-            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            manager.notify(NOTIFICATION_ID, notification.build());
-            return this;
-        }
-
-        void cancelNotification() {
-            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            manager.cancel(NOTIFICATION_ID);
-        }
     }
 
     public class TrackBinder extends Binder {
