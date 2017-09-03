@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -66,6 +67,15 @@ public class AppNotification {
             Intent previousIntent = new Intent(context, MediaPlayerService.class);
             previousIntent.setAction(Constants.ACTION_PREVIOUS_TRACK);
 
+            // ALBUM ART
+            Bitmap albumArt;
+            if (track.getAlbumArt() != null) {
+                albumArt = BitmapFactory.decodeFile(track.getAlbumArt());
+            } else {
+                albumArt = ImageUtil.getInstance()
+                        .drawableToBitmap(ContextCompat.getDrawable(context, R.drawable.ic_placeholder_album_small));
+            }
+
             // NOTIFICATION
             notificationBuilder
                     .setContentIntent(PendingIntent.getActivity(context, 0, openPlayerIntent, 0))
@@ -77,7 +87,7 @@ public class AppNotification {
 
                     .setContentTitle(track.getTitle())
                     .setContentText(track.getArtist())
-                    .setLargeIcon(BitmapFactory.decodeFile(track.getAlbumArt()))
+                    .setLargeIcon(albumArt)
 
                     .setStyle(new NotificationCompat.MediaStyle()
                             .setMediaSession(mediaToken)

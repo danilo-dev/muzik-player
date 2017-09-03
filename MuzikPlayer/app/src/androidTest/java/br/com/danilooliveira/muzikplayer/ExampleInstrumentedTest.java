@@ -2,6 +2,12 @@ package br.com.danilooliveira.muzikplayer;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.VectorDrawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -31,7 +37,6 @@ public class ExampleInstrumentedTest {
         assertEquals("br.com.danilooliveira.muzikplayer", appContext.getPackageName());
     }
 
-    @Test
     public void getAudioFiles() throws Exception {
         Context appContext = InstrumentationRegistry.getTargetContext();
 
@@ -54,5 +59,25 @@ public class ExampleInstrumentedTest {
         cursor.close();
 
         assertTrue(cursor.isClosed());
+    }
+
+    @Test
+    public void getBitmapFromResources() {
+        Context appContext = InstrumentationRegistry.getTargetContext();
+
+        Drawable drawable = appContext.getResources().getDrawable(R.drawable.ic_placeholder_album_small);
+        Bitmap bitmap = vectorDrawableToBitmap(drawable);
+        assertTrue(bitmap != null);
+    }
+
+    private Bitmap vectorDrawableToBitmap(Drawable vectorDrawable) {
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(),
+                vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        vectorDrawable.draw(canvas);
+
+        return bitmap;
     }
 }
