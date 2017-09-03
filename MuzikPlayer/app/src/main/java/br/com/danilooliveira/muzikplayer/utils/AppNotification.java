@@ -79,7 +79,8 @@ public class AppNotification {
             // NOTIFICATION
             notificationBuilder
                     .setContentIntent(PendingIntent.getActivity(context, 0, openPlayerIntent, 0))
-                    .setDeleteIntent(PendingIntent.getService(context, 0, playPauseIntent, 0))
+                    // TODO: Pausar reprodução na intent de deletar
+//                    .setDeleteIntent(PendingIntent.getService(context, 0, playPauseIntent, 0))
 
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                     .setSmallIcon(R.drawable.ic_logo_flat_white)
