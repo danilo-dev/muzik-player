@@ -136,6 +136,7 @@ public class PlayerActivity extends BaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_queue:
+                startActivity(new Intent(this, QueueActivity.class));
                 break;
 
             default:

@@ -376,15 +376,19 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
      * Toca uma faixa, se não for null
      */
     public void resetQueue(@Nullable Track track) {
-        currentPosition = 0;
         mixUpQueue();
 
         if (track != null) {
             if (isShuffle) {
                 currentPosition = queue.indexOf(track);
+                track = queue.remove(currentPosition);
+                queue.add(0, track);
             } else {
                 currentPosition = trackList.indexOf(track);
+                track = trackList.remove(currentPosition);
+                trackList.add(0, track);
             }
+            currentPosition = 0;
             playTrack(track);
         }
     }

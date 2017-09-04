@@ -69,7 +69,7 @@
         </LinearLayout>
 
         <include
-            layout="@layout/player_bottom"
+            layout="@layout/include_player_bottom"
             />
 
     </LinearLayout>

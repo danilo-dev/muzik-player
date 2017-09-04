@@ -43,6 +43,13 @@
             />
 
         <activity
+            android:name=".activities.QueueActivity"
+            android:label="@string/title_queue"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".activities.PlayerActivity"
+            />
+
+        <activity
             android:name=".activities.SettingsActivity"
             android:label="@string/title_settings"
             android:screenOrientation="portrait"

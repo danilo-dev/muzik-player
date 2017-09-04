@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/player_bottom_control"
     android:background="@color/player_bottom"
     android:layout_width="match_parent"
@@ -15,7 +15,6 @@
     android:paddingRight="16dp"
     android:paddingBottom="8dp"
     android:visibility="gone"
-    tools:showIn="@layout/app_bar_main"
     >
     <ImageView
         android:id="@+id/img_album_art"

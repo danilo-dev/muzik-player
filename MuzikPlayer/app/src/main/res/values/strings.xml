@@ -23,16 +23,18 @@
         precisamos que você nos dê permissão de leitura e gravação no armazenamento.</string>
     <string name="dialog_permission_storage_btn_ok">Vamos lá!</string>
 
-    <string name="action_queue">Fila</string>
+    <string name="action_queue">Lista de reprodução</string>
     <string name="action_search">Pesquisar</string>
 
     <string name="cd_album_art">Capa do álbum</string>
     <string name="cd_btn_next_track">Próxima faixa</string>
     <string name="cd_btn_previous_track">Faixa anterior</string>
     <string name="cd_btn_repeat">Repetir</string>
+    <string name="cd_btn_reorder">Reordenar</string>
     <string name="cd_btn_shuffle">Aleatório</string>
     <string name="cd_btn_state_control">Play ou pause</string>
     <string name="cd_empty_track_list">Nenhuma música encontrada</string>
 
+    <string name="title_queue">Lista de reprodução</string>
     <string name="title_settings">Configurações</string>
 </resources>
