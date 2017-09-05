@@ -37,6 +37,8 @@
         android:layout_height="wrap_content"
         android:layout_toEndOf="@id/img_album_art"
         android:layout_toRightOf="@id/img_album_art"
+        android:layout_toStartOf="@+id/txt_duration"
+        android:layout_toLeftOf="@+id/txt_duration"
         />
     <TextView
         android:id="@+id/txt_duration"
