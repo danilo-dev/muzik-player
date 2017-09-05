@@ -85,7 +85,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
             @Override
             public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
-                MediaPlayerService.this.mediaPlayer = null;
+//                MediaPlayerService.this.mediaPlayer = null;
                 return false;
             }
         });
@@ -105,7 +105,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         MediaButtonReceiver.handleIntent(mediaSession, intent);
-        if (intent.getAction() != null && !intent.getAction().isEmpty()) {
+        if (intent != null && intent.getAction() != null && !intent.getAction().isEmpty()) {
             Log.d(MediaPlayerService.class.getSimpleName(), "Action: " + intent.getAction());
             switch (intent.getAction()) {
                 case Constants.ACTION_PLAY_PAUSE:
@@ -142,7 +142,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
     @Override
     public boolean onUnbind(Intent intent) {
-        if (mediaPlayer == null) {
+        /*if (mediaPlayer == null) {
             return false;
         }
         try {
@@ -153,7 +153,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             e.printStackTrace();
         } finally {
             mediaPlayer.release();
-        }
+        }*/
         return false;
     }
 

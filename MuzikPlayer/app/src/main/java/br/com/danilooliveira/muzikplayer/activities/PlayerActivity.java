@@ -37,7 +37,7 @@ public class PlayerActivity extends BaseActivity {
 
     private TrackSwipePager trackSwipePager;
     private SimpleDateFormat timeFormatter = new SimpleDateFormat("mm:ss", Locale.getDefault());
-    private Timer timer = new Timer();
+    private Timer timer;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -109,7 +109,12 @@ public class PlayerActivity extends BaseActivity {
                 mediaPlayerService.changeRepeatType();
             }
         });
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -146,8 +151,8 @@ public class PlayerActivity extends BaseActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onStop() {
+        super.onStop();
         if (timer != null) {
             timer.cancel();
         }

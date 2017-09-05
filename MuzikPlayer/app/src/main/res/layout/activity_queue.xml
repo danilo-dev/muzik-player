@@ -30,7 +30,7 @@
         />
 
     <include
-        layout="@layout/include_player_bottom"
+        layout="@layout/include_mini_player"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         />

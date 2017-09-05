@@ -38,6 +38,8 @@ import br.com.danilooliveira.muzikplayer.interfaces.OnAdapterListener;
 import br.com.danilooliveira.muzikplayer.utils.Constants;
 
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
+    private static final Uri.Builder uriBuilder = new Uri.Builder().scheme("file");
+
     private DrawerLayout mDrawerLayout;
     private View playerBottomControl, emptyState;
     private ImageView imgAlbumArt;
@@ -55,14 +57,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         setSupportActionBar(toolbar);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        playerBottomControl = findViewById(R.id.player_bottom_control);
+        playerBottomControl = findViewById(R.id.mini_player);
         emptyState = findViewById(android.R.id.empty);
         imgAlbumArt = (ImageView) findViewById(R.id.img_album_art);
         txtCurrentMediaTitle = (TextView) findViewById(R.id.txt_current_track_title);
         txtCurrentMediaArtist = (TextView) findViewById(R.id.txt_current_track_artist);
-        btnPlayerBottomStateControl = (ImageButton) findViewById(R.id.btn_player_bottom_state_control);
-        ImageButton btnPlayerBottomPrevious = (ImageButton) findViewById(R.id.btn_player_bottom_previous);
-        ImageButton btnPlayerBottomNext = (ImageButton) findViewById(R.id.btn_player_bottom_next);
+        btnPlayerBottomStateControl = (ImageButton) findViewById(R.id.btn_play_pause);
+        ImageButton btnPlayerBottomPrevious = (ImageButton) findViewById(R.id.btn_previous);
+        ImageButton btnPlayerBottomNext = (ImageButton) findViewById(R.id.btn_next);
         RecyclerView recyclerView = (RecyclerView) findViewById(android.R.id.list);
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 
@@ -225,27 +227,27 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     public BroadcastReceiver onTrackChanged() {
         return new BroadcastReceiver() {
-            private final Uri.Builder uriBuilder = new Uri.Builder().scheme("file");
-
             @Override
             public void onReceive(Context context, Intent intent) {
-                Track track = intent.getParcelableExtra(Constants.BUNDLE_TRACK);
-
-                playerBottomControl.setVisibility(View.VISIBLE);
-                txtCurrentMediaTitle.setText(track.getTitle());
-                txtCurrentMediaArtist.setText(track.getArtist());
-
-                if (track.getAlbumArt() != null) {
-                    Picasso.with(context)
-                            .load(uriBuilder.path(track.getAlbumArt()).build())
-                            .into(imgAlbumArt);
-                } else {
-                    imgAlbumArt.setImageResource(R.drawable.ic_placeholder_album_small);
-                }
-
-                mTrackAdapter.setSelectedTrack(track);
+                updateTrackInfo((Track) intent.getParcelableExtra(Constants.BUNDLE_TRACK));
             }
         };
+    }
+
+    private void updateTrackInfo(Track track) {
+        playerBottomControl.setVisibility(View.VISIBLE);
+        txtCurrentMediaTitle.setText(track.getTitle());
+        txtCurrentMediaArtist.setText(track.getArtist());
+
+        if (track.getAlbumArt() != null) {
+            Picasso.with(this)
+                    .load(uriBuilder.path(track.getAlbumArt()).build())
+                    .into(imgAlbumArt);
+        } else {
+            imgAlbumArt.setImageResource(R.drawable.ic_placeholder_album_small);
+        }
+
+        mTrackAdapter.setSelectedTrack(track);
     }
 
     @Override
@@ -302,5 +304,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     protected void onServiceConnected() {
         mediaPlayerService.setTrackList(mTrackAdapter.getTrackList());
+        // TODO: Atualizar quando estiver em pause também
+        if (mediaPlayerService.isPlaying()) {
+            updateTrackInfo(mediaPlayerService.getCurrentTrack());
+        }
     }
 }

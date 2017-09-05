@@ -10,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -18,6 +19,8 @@ import com.squareup.picasso.Picasso;
 import br.com.danilooliveira.muzikplayer.R;
 import br.com.danilooliveira.muzikplayer.adapters.QueueAdapter;
 import br.com.danilooliveira.muzikplayer.domain.Track;
+import br.com.danilooliveira.muzikplayer.interfaces.OnAdapterListener;
+import br.com.danilooliveira.muzikplayer.utils.Constants;
 
 /**
  * Criado por Danilo de Oliveira (danilo.desenvolvedor@outlook.com) em 03/09/2017.
@@ -28,6 +31,7 @@ public class QueueActivity extends BaseActivity {
     private ImageView imgCurrentTrackAlbum;
     private TextView txtCurrentTrackTitle;
     private TextView txtCurrentTrackArtist;
+    private ImageButton btnPlayPause;
 
     private QueueAdapter mQueueAdapter;
 
@@ -42,15 +46,48 @@ public class QueueActivity extends BaseActivity {
         }
 
         RecyclerView recyclerView = (RecyclerView) findViewById(android.R.id.list);
-        View playerBottom = findViewById(R.id.player_bottom_control);
-        imgCurrentTrackAlbum = (ImageView) playerBottom.findViewById(R.id.img_album_art);
-        txtCurrentTrackTitle = (TextView) playerBottom.findViewById(R.id.txt_current_track_title);
-        txtCurrentTrackArtist = (TextView) playerBottom.findViewById(R.id.txt_current_track_artist);
+        View miniPlayer = findViewById(R.id.mini_player);
+        imgCurrentTrackAlbum = (ImageView) miniPlayer.findViewById(R.id.img_album_art);
+        txtCurrentTrackTitle = (TextView) miniPlayer.findViewById(R.id.txt_current_track_title);
+        txtCurrentTrackArtist = (TextView) miniPlayer.findViewById(R.id.txt_current_track_artist);
+        btnPlayPause = (ImageButton) miniPlayer.findViewById(R.id.btn_play_pause);
 
-        mQueueAdapter = new QueueAdapter(this);
+        txtCurrentTrackTitle.setSelected(true);
+        txtCurrentTrackArtist.setSelected(true);
+
+        mQueueAdapter = new QueueAdapter(this, new OnAdapterListener() {
+            @Override
+            public void onTrackClick(Track track) {
+                mediaPlayerService.playTrack(track);
+            }
+
+            @Override
+            public void onShuffleClick() {
+                // Do nothing...
+            }
+        });
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mQueueAdapter);
-        playerBottom.setVisibility(View.VISIBLE);
+        miniPlayer.setVisibility(View.VISIBLE);
+
+        miniPlayer.findViewById(R.id.btn_previous).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mediaPlayerService.playPrevious(true);
+            }
+        });
+        btnPlayPause.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mediaPlayerService.changeTrackRunningState();
+            }
+        });
+        miniPlayer.findViewById(R.id.btn_next).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mediaPlayerService.playNext();
+            }
+        });
     }
 
     private void updateTrackInfo(Track track) {
@@ -73,7 +110,7 @@ public class QueueActivity extends BaseActivity {
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                // TODO: Atualizar mini-player
+                btnPlayPause.setImageResource(R.drawable.ic_play);
             }
         };
     }
@@ -83,6 +120,7 @@ public class QueueActivity extends BaseActivity {
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                btnPlayPause.setImageResource(R.drawable.ic_pause);
                 // TODO: Atualizar mini-player (adapter também??)
             }
         };
@@ -113,7 +151,7 @@ public class QueueActivity extends BaseActivity {
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                // TODO: Atualizar mini-player e adapter
+                updateTrackInfo((Track) intent.getParcelableExtra(Constants.BUNDLE_TRACK));
             }
         };
     }

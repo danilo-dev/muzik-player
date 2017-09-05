@@ -61,8 +61,8 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (mediaIntent == null) {
             mediaIntent = new Intent(this, MediaPlayerService.class);
             startService(mediaIntent);
-            bindService(mediaIntent, serviceConnection, Context.BIND_AUTO_CREATE);
         }
+        bindService(mediaIntent, serviceConnection, Context.BIND_AUTO_CREATE);
         LocalBroadcastManager.getInstance(this)
                 .registerReceiver(onPauseTrackReceiver, new IntentFilter(Constants.ACTION_PAUSE));
         LocalBroadcastManager.getInstance(this)
@@ -78,8 +78,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        stopService(mediaIntent);
+    protected void onStop() {
         unbindService(serviceConnection);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(onPauseTrackReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(onPlayTrackReceiver);
@@ -87,7 +86,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(onShuffleChangedReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(onTrackChangedReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(onTrackListChangedReceiver);
-        super.onDestroy();
+        super.onStop();
     }
 
     protected abstract BroadcastReceiver onPauseTrack();
