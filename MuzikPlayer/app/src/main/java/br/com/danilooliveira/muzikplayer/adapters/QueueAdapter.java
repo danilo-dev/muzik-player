@@ -52,6 +52,21 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.TrackViewHol
         return trackList == null ? 0 : trackList.size();
     }
 
+    public void setSelectedTrack(Track track) {
+        // Desseleciona a última faixa
+        for (Track t : trackList) {
+            if (t.isSelected()) {
+                t.setSelected(false);
+                notifyItemChanged(trackList.indexOf(t) + 1);
+                break;
+            }
+        }
+
+        // Seleciona a faixa atual
+        track.setSelected(true);
+        notifyItemChanged(trackList.indexOf(track) + 1);
+    }
+
     public void setTrackList(List<Track> trackList) {
         this.trackList = trackList;
         notifyDataSetChanged();
