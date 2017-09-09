@@ -79,7 +79,7 @@ public class QueueActivity extends BaseActivity {
         btnPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mediaPlayerService.changeTrackRunningState();
+                mediaPlayerService.playPause();
             }
         });
         miniPlayer.findViewById(R.id.btn_next).setOnClickListener(new View.OnClickListener() {

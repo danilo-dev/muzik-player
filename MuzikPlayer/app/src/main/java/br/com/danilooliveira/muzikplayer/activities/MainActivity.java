@@ -101,7 +101,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         btnPlayerBottomStateControl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mediaPlayerService.changeTrackRunningState();
+                mediaPlayerService.playPause();
             }
         });
         btnPlayerBottomPrevious.setOnClickListener(new View.OnClickListener() {

@@ -74,7 +74,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                 if (mediaPlayer == null || trackList == null || trackList.isEmpty()) {
                     return;
                 }
-                changeTrackRunningState();
+                playPause();
             }
         });
 
@@ -109,7 +109,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             Log.d(MediaPlayerService.class.getSimpleName(), "Action: " + intent.getAction());
             switch (intent.getAction()) {
                 case Constants.ACTION_PLAY_PAUSE:
-                    changeTrackRunningState();
+                    playPause();
                     break;
 
                 case Constants.ACTION_NEXT_TRACK:
@@ -162,7 +162,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
      * Se estiver pausada, é reproduzida a partir do ponto
      * em que foi dado pause
      */
-    public void changeTrackRunningState() {
+    public void playPause() {
         boolean isPlaying = mediaPlayer.isPlaying();
 
         appNotification = new AppNotification.Builder(this, mediaSession)

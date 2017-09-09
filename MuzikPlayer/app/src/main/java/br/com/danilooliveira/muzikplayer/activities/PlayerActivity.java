@@ -70,19 +70,19 @@ public class PlayerActivity extends BaseActivity {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                mediaPlayerService.changeTrackRunningState();
+                mediaPlayerService.playPause();
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mediaPlayerService.setCurrentDuration(seekBar.getProgress());
-                mediaPlayerService.changeTrackRunningState();
+                mediaPlayerService.playPause();
             }
         });
         btnStateControl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mediaPlayerService.changeTrackRunningState();
+                mediaPlayerService.playPause();
             }
         });
         findViewById(R.id.btn_previous).setOnClickListener(new View.OnClickListener() {
