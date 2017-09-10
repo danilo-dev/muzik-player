@@ -253,21 +253,15 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     @Override
-    public BroadcastReceiver onPauseTrack() {
+    protected BroadcastReceiver onPlayPauseTrack() {
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                btnPlayerBottomStateControl.setImageResource(R.drawable.ic_play);
-            }
-        };
-    }
-
-    @Override
-    public BroadcastReceiver onPlayTrack() {
-        return new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                btnPlayerBottomStateControl.setImageResource(R.drawable.ic_pause);
+                if (mediaPlayerService.isPlaying()) {
+                    btnPlayerBottomStateControl.setImageResource(R.drawable.ic_pause);
+                } else {
+                    btnPlayerBottomStateControl.setImageResource(R.drawable.ic_play);
+                }
             }
         };
     }

@@ -204,21 +204,15 @@ public class PlayerActivity extends BaseActivity {
     }
 
     @Override
-    protected BroadcastReceiver onPauseTrack() {
+    protected BroadcastReceiver onPlayPauseTrack() {
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                btnStateControl.setImageResource(R.drawable.ic_play_circle);
-            }
-        };
-    }
-
-    @Override
-    protected BroadcastReceiver onPlayTrack() {
-        return new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                btnStateControl.setImageResource(R.drawable.ic_pause_circle);
+                if (mediaPlayerService.isPlaying()) {
+                    btnStateControl.setImageResource(R.drawable.ic_pause_circle);
+                } else {
+                    btnStateControl.setImageResource(R.drawable.ic_play_circle);
+                }
             }
         };
     }

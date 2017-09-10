@@ -124,22 +124,15 @@ public class QueueActivity extends BaseActivity {
     }
 
     @Override
-    protected BroadcastReceiver onPauseTrack() {
+    protected BroadcastReceiver onPlayPauseTrack() {
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                btnPlayPause.setImageResource(R.drawable.ic_play);
-            }
-        };
-    }
-
-    @Override
-    protected BroadcastReceiver onPlayTrack() {
-        return new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                btnPlayPause.setImageResource(R.drawable.ic_pause);
-                // TODO: Atualizar mini-player (adapter também??)
+                if (mediaPlayerService.isPlaying()) {
+                    btnPlayPause.setImageResource(R.drawable.ic_pause);
+                } else {
+                    btnPlayPause.setImageResource(R.drawable.ic_play);
+                }
             }
         };
     }

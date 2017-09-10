@@ -79,7 +79,7 @@ public class SettingsActivity extends BaseActivity {
                 progressDialog.dismiss();
 
                 mediaPlayerService.setTrackList(trackList);
-                mediaPlayerService.stop();
+                mediaPlayerService.resetTrackList();
             }
         }).execute();
     }
@@ -119,17 +119,7 @@ public class SettingsActivity extends BaseActivity {
     }
 
     @Override
-    protected BroadcastReceiver onPauseTrack() {
-        return new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                // Do nothing...
-            }
-        };
-    }
-
-    @Override
-    protected BroadcastReceiver onPlayTrack() {
+    protected BroadcastReceiver onPlayPauseTrack() {
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {

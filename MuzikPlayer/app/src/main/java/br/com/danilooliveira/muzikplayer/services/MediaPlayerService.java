@@ -175,20 +175,10 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
         if (isPlaying) {
             mediaPlayer.pause();
-            LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PAUSE));
         } else {
             mediaPlayer.start();
-            LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PLAY));
         }
-    }
-
-    public void stop() {
-        appNotification.cancelNotification();
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.pause();
-        }
-        mediaPlayer.stop();
-        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_TRACK_LIST_CHANGED));
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PLAY_PAUSE));
     }
 
     /**
@@ -235,8 +225,8 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                     .show();
 
             if (playNow) {
-                LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PLAY));
                 mediaPlayer.start();
+                LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PLAY_PAUSE));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -411,6 +401,15 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             currentPosition--;
         }
         getCurrentTrackList().remove(position);
+    }
+
+    public void resetTrackList() {
+        appNotification.cancelNotification();
+        if (mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
+        }
+        mediaPlayer.stop();
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_TRACK_LIST_CHANGED));
     }
 
     /**

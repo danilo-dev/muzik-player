@@ -19,8 +19,7 @@ import br.com.danilooliveira.muzikplayer.utils.Constants;
  * Criado por Danilo de Oliveira (danilo.desenvolvedor@outlook.com) em 06/08/2017.
  */
 public abstract class BaseActivity extends AppCompatActivity {
-    private BroadcastReceiver onPauseTrackReceiver;
-    private BroadcastReceiver onPlayTrackReceiver;
+    private BroadcastReceiver onPlayPauseReceiver;
     private BroadcastReceiver onRepeatTypeChangedReceiver;
     private BroadcastReceiver onShuffleChangedReceiver;
     private BroadcastReceiver onTrackChangedReceiver;
@@ -47,8 +46,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        onPauseTrackReceiver = onPauseTrack();
-        onPlayTrackReceiver = onPlayTrack();
+        onPlayPauseReceiver = onPlayPauseTrack();
         onRepeatTypeChangedReceiver = onRepeatTypeChanged();
         onShuffleChangedReceiver = onShuffleChanged();
         onTrackChangedReceiver = onTrackChanged();
@@ -64,9 +62,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
         bindService(mediaIntent, serviceConnection, Context.BIND_AUTO_CREATE);
         LocalBroadcastManager.getInstance(this)
-                .registerReceiver(onPauseTrackReceiver, new IntentFilter(Constants.ACTION_PAUSE));
-        LocalBroadcastManager.getInstance(this)
-                .registerReceiver(onPlayTrackReceiver, new IntentFilter(Constants.ACTION_PLAY));
+                .registerReceiver(onPlayPauseReceiver, new IntentFilter(Constants.ACTION_PLAY_PAUSE));
         LocalBroadcastManager.getInstance(this)
                 .registerReceiver(onRepeatTypeChangedReceiver, new IntentFilter(Constants.ACTION_REPEAT_TYPE_CHANGED));
         LocalBroadcastManager.getInstance(this)
@@ -80,8 +76,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         unbindService(serviceConnection);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(onPauseTrackReceiver);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(onPlayTrackReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(onPlayPauseReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(onRepeatTypeChangedReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(onShuffleChangedReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(onTrackChangedReceiver);
@@ -89,9 +84,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onStop();
     }
 
-    protected abstract BroadcastReceiver onPauseTrack();
-
-    protected abstract BroadcastReceiver onPlayTrack();
+    protected abstract BroadcastReceiver onPlayPauseTrack();
 
     protected abstract BroadcastReceiver onRepeatTypeChanged();
 
