@@ -121,6 +121,20 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        if (mediaPlayerService != null) {
+            updateTrackInfo(mediaPlayerService.getCurrentTrack());
+
+            if (mediaPlayerService.isPlaying()) {
+                btnPlayerBottomStateControl.setImageResource(R.drawable.ic_pause);
+            } else {
+                btnPlayerBottomStateControl.setImageResource(R.drawable.ic_play);
+            }
+        }
+    }
+
+    @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_settings:
@@ -304,9 +318,5 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     protected void onServiceConnected() {
         mediaPlayerService.setTrackList(mTrackAdapter.getTrackList());
-        // TODO: Atualizar quando estiver em pause também
-        if (mediaPlayerService.isPlaying()) {
-            updateTrackInfo(mediaPlayerService.getCurrentTrack());
-        }
     }
 }

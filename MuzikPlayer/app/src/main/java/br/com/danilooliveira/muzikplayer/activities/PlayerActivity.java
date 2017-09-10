@@ -112,25 +112,6 @@ public class PlayerActivity extends BaseActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mediaPlayerService != null && mediaPlayerService.isPlaying()) {
-                            updateDurationInfo();
-                        }
-                    }
-                });
-            }
-        }, 0, 17);
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.activity_player, menu);
@@ -278,6 +259,21 @@ public class PlayerActivity extends BaseActivity {
                 // Do nothing...
             }
         });
+
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mediaPlayerService != null && mediaPlayerService.isPlaying()) {
+                            updateDurationInfo();
+                        }
+                    }
+                });
+            }
+        }, 0, 17);
 
         btnStateControl.setImageResource(mediaPlayerService.isPlaying()? R.drawable.ic_pause_circle : R.drawable.ic_play_circle);
         updateTrackInfo();

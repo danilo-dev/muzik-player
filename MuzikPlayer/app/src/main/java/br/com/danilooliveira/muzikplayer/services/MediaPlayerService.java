@@ -193,7 +193,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
      * Reproduz uma nova faixa
      * @param track Faixa a ser reproduzida
      */
-    public void playTrack(final Track track) {
+    private void play(final Track track) {
         mediaPlayer.reset();
         try {
             mediaPlayer.setDataSource(track.getData());
@@ -209,7 +209,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                             break;
 
                         case Constants.TYPE_REPEAT_CURRENT:
-                            playTrack(track);
+                            play(track);
                             break;
 
                         case Constants.TYPE_REPEAT_ALL:
@@ -235,6 +235,16 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             e.printStackTrace();
             playNext();
         }
+    }
+
+    public void playTrack(Track track) {
+        if (isShuffle) {
+            currentPosition = queue.indexOf(track);
+        } else {
+            currentPosition = trackList.indexOf(track);
+        }
+
+        play(track);
     }
 
     /**
@@ -278,7 +288,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             track = trackList.get(currentPosition);
         }
 
-        playTrack(track);
+        play(track);
     }
 
     /**
@@ -311,7 +321,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             track = trackList.get(currentPosition);
         }
 
-        playTrack(track);
+        play(track);
     }
 
     /**
@@ -327,7 +337,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         i.putExtra(Constants.BUNDLE_SHUFFLE, isShuffle);
         LocalBroadcastManager.getInstance(this).sendBroadcast(i);
 
-        playTrack(queue.get(currentPosition));
+        play(queue.get(currentPosition));
     }
 
     public void setCurrentDuration(int duration) {
@@ -389,7 +399,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                 trackList.add(0, track);
             }
             currentPosition = 0;
-            playTrack(track);
+            play(track);
         }
     }
 

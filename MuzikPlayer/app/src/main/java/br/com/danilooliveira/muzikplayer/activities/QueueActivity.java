@@ -170,5 +170,10 @@ public class QueueActivity extends BaseActivity {
     protected void onServiceConnected() {
         mQueueAdapter.setTrackList(mediaPlayerService.getCurrentTrackList());
         updateTrackInfo(mediaPlayerService.getCurrentTrack());
+        if (mediaPlayerService.isPlaying()) {
+            btnPlayPause.setImageResource(R.drawable.ic_pause);
+        } else {
+            btnPlayPause.setImageResource(R.drawable.ic_play);
+        }
     }
 }
