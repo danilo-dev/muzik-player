@@ -141,20 +141,22 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     }
 
     @Override
-    public boolean onUnbind(Intent intent) {
-        /*if (mediaPlayer == null) {
-            return false;
-        }
-        try {
-            if (mediaPlayer.isPlaying()) {
-                mediaPlayer.stop();
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        if (mediaPlayer != null) {
+            try {
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                }
+                if (appNotification != null) {
+                    appNotification.cancelNotification();
+                }
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            } finally {
+                mediaPlayer.release();
             }
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        } finally {
-            mediaPlayer.release();
-        }*/
-        return false;
+        }
     }
 
     /**
