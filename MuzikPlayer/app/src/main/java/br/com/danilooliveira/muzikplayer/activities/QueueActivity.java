@@ -28,6 +28,7 @@ import br.com.danilooliveira.muzikplayer.utils.Constants;
 public class QueueActivity extends BaseActivity {
     private static final Uri.Builder uriBuilder = new Uri.Builder().scheme("file");
 
+    private RecyclerView mRecyclerView;
     private ImageView imgCurrentTrackAlbum;
     private TextView txtCurrentTrackTitle;
     private TextView txtCurrentTrackArtist;
@@ -45,7 +46,7 @@ public class QueueActivity extends BaseActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        RecyclerView recyclerView = (RecyclerView) findViewById(android.R.id.list);
+        mRecyclerView = (RecyclerView) findViewById(android.R.id.list);
         View miniPlayer = findViewById(R.id.mini_player);
         imgCurrentTrackAlbum = (ImageView) miniPlayer.findViewById(R.id.img_album_art);
         txtCurrentTrackTitle = (TextView) miniPlayer.findViewById(R.id.txt_current_track_title);
@@ -66,8 +67,8 @@ public class QueueActivity extends BaseActivity {
                 // Do nothing...
             }
         });
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(mQueueAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setAdapter(mQueueAdapter);
         miniPlayer.setVisibility(View.VISIBLE);
 
         miniPlayer.findViewById(R.id.btn_previous).setOnClickListener(new View.OnClickListener() {
@@ -175,5 +176,6 @@ public class QueueActivity extends BaseActivity {
         } else {
             btnPlayPause.setImageResource(R.drawable.ic_play);
         }
+        mRecyclerView.scrollToPosition(mediaPlayerService.getCurrentPosition());
     }
 }
