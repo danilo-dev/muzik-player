@@ -28,6 +28,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import br.com.danilooliveira.muzikplayer.R;
@@ -48,6 +49,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private ImageButton btnPlayerBottomStateControl;
 
     private TrackAdapter mTrackAdapter;
+
+    private static boolean mediaPlayerServiceUpdated = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -321,6 +324,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     @Override
     protected void onServiceConnected() {
-        mediaPlayerService.setTrackList(mTrackAdapter.getTrackList());
+        if (!mediaPlayerServiceUpdated) {
+            mediaPlayerService.setTrackList(new ArrayList<>(mTrackAdapter.getTrackList()));
+            mediaPlayerServiceUpdated = true;
+        }
     }
 }

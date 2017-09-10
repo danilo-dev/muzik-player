@@ -9,10 +9,12 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -67,8 +69,23 @@ public class QueueActivity extends BaseActivity {
                 // Do nothing...
             }
         });
+        ItemTouchHelper recyclerTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.START | ItemTouchHelper.END) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                Toast.makeText(mediaPlayerService, "Moved", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                mediaPlayerService.removeFromQueue(position);
+                mQueueAdapter.notifyItemRemoved(position);
+            }
+        });
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mQueueAdapter);
+        recyclerTouchHelper.attachToRecyclerView(mRecyclerView);
         miniPlayer.setVisibility(View.VISIBLE);
 
         miniPlayer.findViewById(R.id.btn_previous).setOnClickListener(new View.OnClickListener() {
