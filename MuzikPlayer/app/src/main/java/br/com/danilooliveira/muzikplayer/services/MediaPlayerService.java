@@ -408,7 +408,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     /**
      * Recupera a faixa atual
      */
-    public Track getCurrentTrack() {
+    public Track getCurrentTrack() throws IndexOutOfBoundsException {
         if (isShuffle) {
             return queue.get(currentPosition);
         } else {

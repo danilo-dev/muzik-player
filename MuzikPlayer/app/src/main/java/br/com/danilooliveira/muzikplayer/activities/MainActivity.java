@@ -124,7 +124,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     protected void onStart() {
         super.onStart();
         if (mediaPlayerService != null) {
-            updateTrackInfo(mediaPlayerService.getCurrentTrack());
+            try {
+                updateTrackInfo(mediaPlayerService.getCurrentTrack());
+            } catch (IndexOutOfBoundsException e) {
+                e.printStackTrace();
+            }
 
             if (mediaPlayerService.isPlaying()) {
                 btnPlayerBottomStateControl.setImageResource(R.drawable.ic_pause);
