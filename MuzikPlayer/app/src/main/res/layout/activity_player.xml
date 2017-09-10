@@ -103,7 +103,7 @@
                 />
             <ImageButton
                 android:id="@+id/btn_state_control"
-                android:contentDescription="@string/cd_btn_state_control"
+                android:contentDescription="@string/cd_btn_play_pause"
                 android:layout_height="46dp"
                 android:layout_weight="1"
                 android:src="@drawable/ic_pause_circle"

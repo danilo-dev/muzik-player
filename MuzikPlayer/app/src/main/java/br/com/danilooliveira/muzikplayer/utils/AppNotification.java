@@ -4,11 +4,9 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v7.app.NotificationCompat;
+import android.widget.RemoteViews;
 
 import br.com.danilooliveira.muzikplayer.R;
 import br.com.danilooliveira.muzikplayer.activities.PlayerActivity;
@@ -45,13 +43,9 @@ public class AppNotification {
 
         private final NotificationCompat.Builder notificationBuilder;
 
-        private final MediaSessionCompat.Token mediaToken;
-
-        public Builder(Context context, MediaSessionCompat mediaSessionCompat) {
+        public Builder(Context context) {
             this.context = context;
             notificationBuilder = new NotificationCompat.Builder(context);
-
-            mediaToken = mediaSessionCompat.getSessionToken();
         }
 
         public Builder setDefault(Track track, boolean isPlaying) {
@@ -67,50 +61,37 @@ public class AppNotification {
             Intent previousIntent = new Intent(context, MediaPlayerService.class);
             previousIntent.setAction(Constants.ACTION_PREVIOUS_TRACK);
 
-            // ALBUM ART
-            Bitmap albumArt;
-            if (track.getAlbumArt() != null) {
-                albumArt = BitmapFactory.decodeFile(track.getAlbumArt());
+            // VIEWS
+            RemoteViews smallBodyView = new RemoteViews(context.getPackageName(), R.layout.notification_body_small);
+            smallBodyView.setTextViewText(R.id.txt_title, track.getTitle());
+            smallBodyView.setTextViewText(R.id.txt_artist, track.getArtist());
+
+            if (isPlaying) {
+                smallBodyView.setImageViewResource(R.id.btn_play_pause, R.drawable.ic_pause);
             } else {
-                albumArt = ImageUtil.getInstance()
-                        .drawableToBitmap(ContextCompat.getDrawable(context, R.drawable.ic_placeholder_album_small));
+                smallBodyView.setImageViewResource(R.id.btn_play_pause, R.drawable.ic_play);
             }
+
+            // ALBUM ART
+            if (track.getAlbumArt() != null) {
+                smallBodyView.setImageViewBitmap(R.id.img_album_art, BitmapFactory.decodeFile(track.getAlbumArt()));
+            } else {
+                smallBodyView.setImageViewResource(R.id.img_album_art, R.drawable.ic_placeholder_album_small);
+            }
+
+            // LISTENERS
+            smallBodyView.setOnClickPendingIntent(R.id.btn_previous, PendingIntent.getService(context, 0, previousIntent, 0));
+            smallBodyView.setOnClickPendingIntent(R.id.btn_play_pause, PendingIntent.getService(context, 0, playPauseIntent, 0));
+            smallBodyView.setOnClickPendingIntent(R.id.btn_next, PendingIntent.getService(context, 0, nextIntent, 0));
 
             // NOTIFICATION
             notificationBuilder
                     .setContentIntent(PendingIntent.getActivity(context, 0, openPlayerIntent, 0))
-                    // TODO: Pausar reprodução na intent de deletar
-//                    .setDeleteIntent(PendingIntent.getService(context, 0, playPauseIntent, 0))
+                    .setCustomContentView(smallBodyView)
 
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                    .setSmallIcon(R.drawable.ic_logo_flat_white)
-                    .setColor(ContextCompat.getColor(context, R.color.colorAccent))
-
-                    .setContentTitle(track.getTitle())
-                    .setContentText(track.getArtist())
-                    .setLargeIcon(albumArt)
-
-                    .setStyle(new NotificationCompat.MediaStyle()
-                            .setMediaSession(mediaToken)
-                            .setShowActionsInCompactView(0, 1, 2)
-                            .setCancelButtonIntent(PendingIntent.getService(context, 0, playPauseIntent, 0)));
-
-            notificationBuilder
-                    .addAction(R.drawable.ic_skip_previous, context.getString(R.string.btn_previous_track),
-                            PendingIntent.getService(context, 0, previousIntent, 0));
-
-            if (isPlaying) {
-                notificationBuilder.addAction(R.drawable.ic_pause, context.getString(R.string.btn_pause),
-                        PendingIntent.getService(context, 0, playPauseIntent, 0));
-            } else {
-                notificationBuilder.addAction(R.drawable.ic_play, context.getString(R.string.btn_play),
-                        PendingIntent.getService(context, 0, playPauseIntent, 0));
-            }
-
-            notificationBuilder
-                    .addAction(R.drawable.ic_skip_next, context.getString(R.string.btn_next_track),
-                            PendingIntent.getService(context, 0, nextIntent, 0));
-
+                    .setOngoing(true)
+                    .setSmallIcon(R.drawable.ic_logo_flat_white);
             return this;
         }
 

@@ -32,7 +32,7 @@
     <string name="cd_btn_repeat">Repetir</string>
     <string name="cd_btn_reorder">Reordenar</string>
     <string name="cd_btn_shuffle">Aleatório</string>
-    <string name="cd_btn_state_control">Play ou pause</string>
+    <string name="cd_btn_play_pause">Play ou pause</string>
     <string name="cd_empty_track_list">Nenhuma música encontrada</string>
 
     <string name="title_queue">Lista de reprodução</string>

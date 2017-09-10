@@ -167,7 +167,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     public void playPause() {
         boolean isPlaying = mediaPlayer.isPlaying();
 
-        appNotification = new AppNotification.Builder(this, mediaSession)
+        appNotification = new AppNotification.Builder(this)
                 // O valor de isPlaying vai se inverter nas próximas linhas
                 .setDefault(getCurrentTrack(), !isPlaying)
                 .build()
@@ -219,7 +219,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             trackChanged.putExtra(Constants.BUNDLE_TRACK, track);
             LocalBroadcastManager.getInstance(this).sendBroadcast(trackChanged);
 
-            appNotification = new AppNotification.Builder(this, mediaSession)
+            appNotification = new AppNotification.Builder(this)
                     .setDefault(track, playNow)
                     .build()
                     .show();
