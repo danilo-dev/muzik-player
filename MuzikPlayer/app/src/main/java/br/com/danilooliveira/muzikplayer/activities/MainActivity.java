@@ -28,7 +28,6 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import br.com.danilooliveira.muzikplayer.R;
@@ -49,8 +48,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private ImageButton btnPlayerBottomStateControl;
 
     private TrackAdapter mTrackAdapter;
-
-    private static boolean mediaPlayerServiceUpdated = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,12 +79,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mTrackAdapter = new TrackAdapter(this, new OnAdapterListener() {
             @Override
             public void onTrackClick(Track track) {
-                mediaPlayerService.resetQueue(track);
+                mediaPlayerService.setTrackList(mTrackAdapter.getTrackList());
+                mediaPlayerService.playShuffle(track);
             }
 
             @Override
             public void onShuffleClick() {
-                mediaPlayerService.playShuffle();
+                mediaPlayerService.setTrackList(mTrackAdapter.getTrackList());
+                mediaPlayerService.playShuffle(null);
             }
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -121,24 +120,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         });
 
         findTrackFiles();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (mediaPlayerService != null) {
-            try {
-                updateTrackInfo(mediaPlayerService.getCurrentTrack());
-            } catch (IndexOutOfBoundsException e) {
-                e.printStackTrace();
-            }
-
-            if (mediaPlayerService.isPlaying()) {
-                btnPlayerBottomStateControl.setImageResource(R.drawable.ic_pause);
-            } else {
-                btnPlayerBottomStateControl.setImageResource(R.drawable.ic_play);
-            }
-        }
     }
 
     @Override
@@ -324,9 +305,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     @Override
     protected void onServiceConnected() {
-        if (!mediaPlayerServiceUpdated) {
-            mediaPlayerService.setTrackList(new ArrayList<>(mTrackAdapter.getTrackList()));
-            mediaPlayerServiceUpdated = true;
+        if (mediaPlayerService.getTotalDuration() > 0) {
+            updateTrackInfo(mediaPlayerService.getCurrentTrack());
+            if (mediaPlayerService.isPlaying()) {
+                btnPlayerBottomStateControl.setImageResource(R.drawable.ic_pause);
+            } else {
+                btnPlayerBottomStateControl.setImageResource(R.drawable.ic_play);
+            }
         }
+
     }
 }

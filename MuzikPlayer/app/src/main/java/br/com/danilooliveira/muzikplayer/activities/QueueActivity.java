@@ -61,7 +61,7 @@ public class QueueActivity extends BaseActivity {
         mQueueAdapter = new QueueAdapter(this, new OnAdapterListener() {
             @Override
             public void onTrackClick(Track track) {
-                mediaPlayerService.playTrack(track);
+                mediaPlayerService.playFromQueue(track);
             }
 
             @Override

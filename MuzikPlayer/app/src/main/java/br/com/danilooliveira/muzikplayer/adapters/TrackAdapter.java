@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -96,7 +97,7 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     public List<Track> getTrackList() {
-        return trackList;
+        return new ArrayList<>(trackList);
     }
 
     public void setTrackList(List<Track> trackList) {

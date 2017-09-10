@@ -239,7 +239,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         }
     }
 
-    public void playTrack(Track track) {
+    public void playFromQueue(Track track) {
         if (isShuffle) {
             currentPosition = queue.indexOf(track);
         } else {
@@ -329,17 +329,20 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     /**
      * Reproduz faixas aleatoriamente
      */
-    public void playShuffle() {
-        currentPosition = 0;
+    public void playShuffle(@Nullable Track track) {
         isShuffle = true;
-
         mixUpQueue();
+
+        if (track == null) {
+            track = queue.get(currentPosition = 0);
+        } else {
+            currentPosition = queue.indexOf(track);
+        }
+        play(track);
 
         Intent i = new Intent(Constants.ACTION_SHUFFLE_CHANGED);
         i.putExtra(Constants.BUNDLE_SHUFFLE, isShuffle);
         LocalBroadcastManager.getInstance(this).sendBroadcast(i);
-
-        play(queue.get(currentPosition));
     }
 
     public void setCurrentDuration(int duration) {
@@ -383,25 +386,6 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         return repeatType;
     }
 
-    /**
-     * Reseta a fila de músicas
-     * Toca uma faixa, se não for null
-     */
-    public void resetQueue(@Nullable Track track) {
-        mixUpQueue();
-
-        if (track != null) {
-            if (isShuffle) {
-                currentPosition = queue.indexOf(track);
-                track = queue.remove(currentPosition);
-                queue.add(0, track);
-            } else {
-                currentPosition = trackList.indexOf(track);
-            }
-            play(track);
-        }
-    }
-
     public void removeFromQueue(int position) {
         Track track = getCurrentTrackList().get(position);
         if (position <= currentPosition) {
@@ -417,7 +401,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     /**
      * Recupera a faixa atual
      */
-    public Track getCurrentTrack() throws IndexOutOfBoundsException {
+    public Track getCurrentTrack() {
         if (isShuffle) {
             return queue.get(currentPosition);
         } else {
