@@ -109,13 +109,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         btnPlayerBottomPrevious.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mediaPlayerService.playPrevious(true);
+                mediaPlayerService.playPrevious(true, true);
             }
         });
         btnPlayerBottomNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mediaPlayerService.playNext();
+                mediaPlayerService.playNext(true);
             }
         });
 

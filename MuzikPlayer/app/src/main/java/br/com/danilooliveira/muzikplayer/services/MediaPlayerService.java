@@ -31,7 +31,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     /**
      * Duração mínima reproduzida da música para que ela seja
      * reiniciada ao voltar uma música
-     * @see MediaPlayerService#playPrevious(boolean)
+     * @see MediaPlayerService#playPrevious(boolean, boolean)
      */
     private static final int DEFAULT_MIN_TIME_TO_RESTART = 2 * 1000;
 
@@ -113,11 +113,11 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                     break;
 
                 case Constants.ACTION_NEXT_TRACK:
-                    playNext();
+                    playNext(true);
                     break;
 
                 case Constants.ACTION_PREVIOUS_TRACK:
-                    playPrevious(true);
+                    playPrevious(true, true);
                     break;
 
                 default:
@@ -194,8 +194,12 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     /**
      * Reproduz uma nova faixa
      * @param track Faixa a ser reproduzida
+     * @param defaultBehavior true para reproduzir imediatamente a música atual
+     *                        dependendo se a anterior estava em reprodução ou não.
+     *                        false para reproduzir imediatamente.
      */
-    private void play(final Track track) {
+    private void play(final Track track, boolean defaultBehavior) {
+        final boolean playNow = !defaultBehavior || mediaPlayer.isPlaying();
         mediaPlayer.reset();
         try {
             mediaPlayer.setDataSource(track.getData());
@@ -206,16 +210,16 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                     switch (repeatType) {
                         case Constants.TYPE_NO_REPEAT:
                             if (currentPosition < queue.size()) {
-                                playNext();
+                                playNext(false);
                             }
                             break;
 
                         case Constants.TYPE_REPEAT_CURRENT:
-                            play(track);
+                            play(track, false);
                             break;
 
                         case Constants.TYPE_REPEAT_ALL:
-                            playNext();
+                            playNext(false);
                             break;
                     }
                 }
@@ -225,17 +229,18 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             trackChanged.putExtra(Constants.BUNDLE_TRACK, track);
             LocalBroadcastManager.getInstance(this).sendBroadcast(trackChanged);
 
-            LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PLAY));
-
             appNotification = new AppNotification.Builder(this, mediaSession)
-                    .setDefault(track, true)
+                    .setDefault(track, playNow)
                     .build()
                     .show();
 
-            mediaPlayer.start();
+            if (playNow) {
+                LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_PLAY));
+                mediaPlayer.start();
+            }
         } catch (IOException e) {
             e.printStackTrace();
-            playNext();
+            playNext(false);
         }
     }
 
@@ -246,7 +251,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             currentPosition = trackList.indexOf(track);
         }
 
-        play(track);
+        play(track, true);
     }
 
     /**
@@ -261,16 +266,21 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
      * voltar a uma faixa antes que a primeira (index = 0), reproduz a
      * última (index = list.size() - 1)
      *
-     * @param defaultBehavior true para verificar se a música deve
+     * @param defaultBehavior true para reproduzir imediatamente a música atual
+     *                        dependendo se a anterior estava em reprodução ou não.
+     *                        false para reproduzir imediatamente.
+     *                        @see MediaPlayerService#play(Track, boolean)
+     *
+     * @param defaultRestartBehavior true para verificar se a música deve
      *                        ser reiniciada ou se a música anterior
      *                        deve ser tocada, dependendo da duração
      *                        já reproduzida pela música atual
      *                        @see MediaPlayerService#DEFAULT_MIN_TIME_TO_RESTART
      */
-    public void playPrevious(boolean defaultBehavior) {
+    public void playPrevious(boolean defaultBehavior, boolean defaultRestartBehavior) {
         Track track;
 
-        if (defaultBehavior && getCurrentDuration() >= DEFAULT_MIN_TIME_TO_RESTART) {
+        if (defaultRestartBehavior && getCurrentDuration() >= DEFAULT_MIN_TIME_TO_RESTART) {
             setCurrentDuration(0);
             return;
         }
@@ -290,7 +300,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             track = trackList.get(currentPosition);
         }
 
-        play(track);
+        play(track, defaultBehavior);
     }
 
     /**
@@ -304,8 +314,13 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
      * Se estiver no modo normal {@link MediaPlayerService#isShuffle}
      * e avançar além da última faixa (index = list.size() -1), reproduz
      * a primeira (index = 0)
+     *
+     * @param defaultBehavior true para reproduzir imediatamente a música atual
+     *                        dependendo se a anterior estava em reprodução ou não.
+     *                        false para reproduzir imediatamente.
+     *                        @see MediaPlayerService#play(Track, boolean)
      */
-    public void playNext() {
+    public void playNext(boolean defaultBehavior) {
         Track track;
 
         currentPosition++;
@@ -323,7 +338,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             track = trackList.get(currentPosition);
         }
 
-        play(track);
+        play(track, defaultBehavior);
     }
 
     /**
@@ -338,7 +353,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         } else {
             currentPosition = queue.indexOf(track);
         }
-        play(track);
+        play(track, false);
 
         Intent i = new Intent(Constants.ACTION_SHUFFLE_CHANGED);
         i.putExtra(Constants.BUNDLE_SHUFFLE, isShuffle);
@@ -391,7 +406,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         if (position <= currentPosition) {
             if (position == currentPosition) {
                 track.setSelected(false);
-                playNext();
+                playNext(true);
             }
             currentPosition--;
         }

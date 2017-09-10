@@ -63,6 +63,8 @@ public class PlayerActivity extends BaseActivity {
         trackSwipePager = new TrackSwipePager(getSupportFragmentManager());
 
         seekTrackIndicator.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            private boolean isPlaying;
+
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 txtCurrentDuration.setText(timeFormatter.format(i));
@@ -70,13 +72,17 @@ public class PlayerActivity extends BaseActivity {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                mediaPlayerService.playPause();
+                if (isPlaying = mediaPlayerService.isPlaying()) {
+                    mediaPlayerService.playPause();
+                }
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mediaPlayerService.setCurrentDuration(seekBar.getProgress());
-                mediaPlayerService.playPause();
+                if (isPlaying) {
+                    mediaPlayerService.playPause();
+                }
             }
         });
         btnStateControl.setOnClickListener(new View.OnClickListener() {
@@ -88,13 +94,13 @@ public class PlayerActivity extends BaseActivity {
         findViewById(R.id.btn_previous).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mediaPlayerService.playPrevious(true);
+                mediaPlayerService.playPrevious(true, true);
             }
         });
         findViewById(R.id.btn_next).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mediaPlayerService.playNext();
+                mediaPlayerService.playNext(true);
             }
         });
         btnShuffle.setOnClickListener(new View.OnClickListener() {
@@ -166,6 +172,7 @@ public class PlayerActivity extends BaseActivity {
     }
 
     private void updateTrackInfo() {
+        txtCurrentDuration.setText(timeFormatter.format(mediaPlayerService.getCurrentDuration()));
         txtTotalDuration.setText(timeFormatter.format(mediaPlayerService.getTotalDuration()));
         seekTrackIndicator.setMax(mediaPlayerService.getMediaPlayer().getDuration());
         mViewPager.setCurrentItem(mediaPlayerService.getCurrentPosition(), true);
@@ -248,9 +255,9 @@ public class PlayerActivity extends BaseActivity {
             @Override
             public void onPageSelected(int position) {
                 if (position > mediaPlayerService.getCurrentPosition()) {
-                    mediaPlayerService.playNext();
+                    mediaPlayerService.playNext(true);
                 } else if (position < mediaPlayerService.getCurrentPosition()) {
-                    mediaPlayerService.playPrevious(false);
+                    mediaPlayerService.playPrevious(true, false);
                 }
             }
 
@@ -268,7 +275,7 @@ public class PlayerActivity extends BaseActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if (mediaPlayerService != null && mediaPlayerService.isPlaying()) {
+                        if (mediaPlayerService != null) {
                             updateDurationInfo();
                         }
                     }

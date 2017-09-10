@@ -91,7 +91,7 @@ public class QueueActivity extends BaseActivity {
         miniPlayer.findViewById(R.id.btn_previous).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mediaPlayerService.playPrevious(true);
+                mediaPlayerService.playPrevious(true, true);
             }
         });
         btnPlayPause.setOnClickListener(new View.OnClickListener() {
@@ -103,7 +103,7 @@ public class QueueActivity extends BaseActivity {
         miniPlayer.findViewById(R.id.btn_next).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mediaPlayerService.playNext();
+                mediaPlayerService.playNext(true);
             }
         });
     }
