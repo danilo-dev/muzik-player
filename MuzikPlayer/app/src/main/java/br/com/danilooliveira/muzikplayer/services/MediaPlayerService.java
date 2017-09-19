@@ -391,6 +391,17 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         return repeatType;
     }
 
+    public void moveTrackTo(int fromPos, int toPos) {
+        Track track = getCurrentTrack();
+        if (isShuffle) {
+            queue.add(toPos, queue.remove(fromPos));
+            currentPosition = queue.indexOf(track);
+        } else {
+            trackList.add(toPos, trackList.remove(fromPos));
+            currentPosition = trackList.indexOf(track);
+        }
+    }
+
     public void removeFromQueue(int position) {
         Track track = getCurrentTrackList().get(position);
         if (position <= currentPosition) {
