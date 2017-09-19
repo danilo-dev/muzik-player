@@ -2,7 +2,7 @@
 <resources>
     <dimen name="album_art_small">40dp</dimen>
     <dimen name="album_art_medium">44dp</dimen>
-    <dimen name="album_art_large">270dp</dimen>
+    <dimen name="album_art_large">250dp</dimen>
 
     <dimen name="button_player_bottom_size">32dp</dimen>
 </resources>
