@@ -174,7 +174,7 @@ public class QueueActivity extends BaseActivity {
 
     @Override
     protected void onServiceConnected() {
-        mQueueAdapter.setTrackList(mediaPlayerService.getCurrentTrackList());
+        mQueueAdapter.setTrackList(mediaPlayerService.getQueue());
         updateTrackInfo(mediaPlayerService.getCurrentTrack());
         if (mediaPlayerService.isPlaying()) {
             btnPlayPause.setImageResource(R.drawable.ic_pause);

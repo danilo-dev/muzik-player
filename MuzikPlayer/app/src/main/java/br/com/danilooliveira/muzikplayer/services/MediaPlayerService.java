@@ -40,7 +40,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     private AppNotification appNotification;
 
     /**
-     * Faixas ordenadas alfabeticamente
+     * Lista de faixas
      */
     private List<Track> trackList;
 
@@ -235,11 +235,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     }
 
     public void playFromQueue(Track track) {
-        if (isShuffle) {
-            currentPosition = queue.indexOf(track);
-        } else {
-            currentPosition = trackList.indexOf(track);
-        }
+        currentPosition = queue.indexOf(track);
 
         play(track, true);
     }
@@ -268,8 +264,6 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
      *                        @see MediaPlayerService#DEFAULT_MIN_TIME_TO_RESTART
      */
     public void playPrevious(boolean defaultBehavior, boolean defaultRestartBehavior) {
-        Track track;
-
         if (defaultRestartBehavior && getCurrentDuration() >= DEFAULT_MIN_TIME_TO_RESTART) {
             setCurrentDuration(0);
             return;
@@ -277,20 +271,16 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
         currentPosition--;
 
-        if (isShuffle) {
-            if (currentPosition < 0) {
+        if (currentPosition < 0) {
+            if (isShuffle) {
                 currentPosition = 0;
                 mixUpQueue();
+            } else {
+                currentPosition = queue.size() - 1;
             }
-            track = queue.get(currentPosition);
-        } else {
-            if (currentPosition < 0) {
-                currentPosition = trackList.size() - 1;
-            }
-            track = trackList.get(currentPosition);
         }
 
-        play(track, defaultBehavior);
+        play(queue.get(currentPosition), defaultBehavior);
     }
 
     /**
@@ -311,24 +301,16 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
      *                        @see MediaPlayerService#play(Track, boolean)
      */
     public void playNext(boolean defaultBehavior) {
-        Track track;
-
         currentPosition++;
 
-        if (isShuffle) {
-            if (currentPosition >= queue.size()) {
-                currentPosition = 0;
+        if (currentPosition >= queue.size()) {
+            currentPosition = 0;
+            if (isShuffle) {
                 mixUpQueue();
             }
-            track = queue.get(currentPosition);
-        } else {
-            if (currentPosition >= trackList.size()) {
-                currentPosition = 0;
-            }
-            track = trackList.get(currentPosition);
         }
 
-        play(track, defaultBehavior);
+        play(queue.get(currentPosition), defaultBehavior);
     }
 
     /**
@@ -361,12 +343,15 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     public boolean changeShuffleState() {
         isShuffle = !isShuffle;
 
+        Track currentTrack = queue.get(currentPosition);
+
         if (isShuffle) {
             mixUpQueue();
-            currentPosition = queue.indexOf(trackList.get(currentPosition));
         } else {
-            currentPosition = trackList.indexOf(queue.get(currentPosition));
+            queue.clear();
+            queue.addAll(trackList);
         }
+        currentPosition = queue.indexOf(currentTrack);
 
         AppPreferences.with(this).setShuffleEnabled(isShuffle);
 
@@ -393,17 +378,12 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
     public void moveTrackTo(int fromPos, int toPos) {
         Track track = getCurrentTrack();
-        if (isShuffle) {
-            queue.add(toPos, queue.remove(fromPos));
-            currentPosition = queue.indexOf(track);
-        } else {
-            trackList.add(toPos, trackList.remove(fromPos));
-            currentPosition = trackList.indexOf(track);
-        }
+        queue.add(toPos, queue.remove(fromPos));
+        currentPosition = queue.indexOf(track);
     }
 
     public void removeFromQueue(int position) {
-        Track track = getCurrentTrackList().get(position);
+        Track track = getQueue().get(position);
         if (position <= currentPosition) {
             if (position == currentPosition) {
                 track.setSelected(false);
@@ -411,7 +391,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             }
             currentPosition--;
         }
-        getCurrentTrackList().remove(position);
+        getQueue().remove(position);
     }
 
     public void resetTrackList() {
@@ -426,11 +406,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
      * Recupera a faixa atual
      */
     public Track getCurrentTrack() {
-        if (isShuffle) {
-            return queue.get(currentPosition);
-        } else {
-            return trackList.get(currentPosition);
-        }
+        return queue.get(currentPosition);
     }
 
     public int getCurrentPosition() {
@@ -473,12 +449,8 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         return mediaPlayer.getDuration();
     }
 
-    public List<Track> getCurrentTrackList() {
-        if (isShuffle) {
-            return queue;
-        } else {
-            return trackList;
-        }
+    public List<Track> getQueue() {
+        return queue;
     }
 
     public MediaPlayer getMediaPlayer() {

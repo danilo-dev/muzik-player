@@ -282,7 +282,7 @@ public class PlayerActivity extends BaseActivity {
 
         @Override
         public Fragment getItem(int position) {
-            return TrackInfoFragment.newInstance(mediaPlayerService.getCurrentTrackList().get(position));
+            return TrackInfoFragment.newInstance(mediaPlayerService.getQueue().get(position));
         }
 
         @Override
@@ -292,7 +292,7 @@ public class PlayerActivity extends BaseActivity {
 
         @Override
         public int getCount() {
-            return mediaPlayerService.getCurrentTrackList().size();
+            return mediaPlayerService.getQueue().size();
         }
     }
 }
