@@ -13,6 +13,5 @@
     <color name="text_primary">#afff</color>
     <color name="text_primary_opaque">@android:color/white</color>
 
-    <color name="player_bottom">@color/colorPrimary</color>
-    <color name="text_player_bottom_primary">@android:color/white</color>
+    <color name="mini_player">@color/colorPrimary</color>
 </resources>
