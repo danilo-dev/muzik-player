@@ -63,10 +63,9 @@
         android:layout_toLeftOf="@id/txt_duration"
         android:layout_toStartOf="@id/txt_duration"
         />
-    <ImageButton
+    <ImageView
         android:id="@id/btn_reorder"
         android:contentDescription="@string/cd_btn_reorder"
-        android:background="?attr/selectableItemBackgroundBorderless"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_marginStart="8dp"
@@ -76,6 +75,5 @@
         android:layout_alignParentRight="true"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_swap_vert"
-        style="@style/Base.Widget.AppCompat.Button.Borderless"
         />
 </RelativeLayout>
