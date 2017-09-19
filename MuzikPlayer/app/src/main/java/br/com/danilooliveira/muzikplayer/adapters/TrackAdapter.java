@@ -1,8 +1,8 @@
 package br.com.danilooliveira.muzikplayer.adapters;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.net.Uri;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,8 +34,7 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     private OnAdapterListener audioClickListener;
     private LayoutInflater layoutInflater;
-    private Resources resources;
-    private Picasso picasso;
+    private Context context;
 
     private List<Track> trackList;
 
@@ -43,8 +42,7 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         uriBuilder.scheme("file");
         this.audioClickListener = audioClickListener;
         layoutInflater = LayoutInflater.from(context);
-        resources = context.getResources();
-        picasso = Picasso.with(context);
+        this.context = context;
     }
 
     @Override
@@ -127,17 +125,18 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             txtDuration.setText(timeFormatter.format(track.getDuration()));
 
             if (track.isSelected()) {
-                itemView.setBackgroundColor(resources.getColor(R.color.colorPrimaryDark));
-                container.setBackgroundColor(resources.getColor(R.color.colorPrimary));
+                itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorPrimaryDark));
+                container.setBackgroundColor(ContextCompat.getColor(context, R.color.colorPrimary));
             } else {
-                itemView.setBackgroundColor(resources.getColor(R.color.background_primary));
-                container.setBackgroundColor(resources.getColor(R.color.background_secondary));
+                itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.background_primary));
+                container.setBackgroundColor(ContextCompat.getColor(context, R.color.background_secondary));
             }
 
             if (track.getAlbumArt() == null) {
                 imgAlbumArt.setImageResource(R.drawable.ic_placeholder_album_small);
             } else {
-                picasso.load(uriBuilder.path(track.getAlbumArt()).build())
+                Picasso.with(context)
+                        .load(uriBuilder.path(track.getAlbumArt()).build())
                         .into(imgAlbumArt);
             }
 
@@ -169,12 +168,12 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             }
 
             if (itemCount == 1) {
-                txtShuffleInfo.setText(resources.getString(
+                txtShuffleInfo.setText(context.getString(
                         R.string.txt_shuffle_info_singular,
                         timeFormatter.format(new Date(timeCount))
                 ));
             } else {
-                txtShuffleInfo.setText(resources.getString(
+                txtShuffleInfo.setText(context.getString(
                         R.string.txt_shuffle_info_plural,
                         itemCount,
                         timeFormatter.format(new Date(timeCount))

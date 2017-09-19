@@ -28,9 +28,8 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.TrackViewHol
     private static final SimpleDateFormat timeFormatter = new SimpleDateFormat("mm:ss", Locale.getDefault());
 
     private final OnAdapterListener onAdapterListener;
-    private final Context context;
     private final LayoutInflater inflater;
-    private final Picasso picasso;
+    private final Context context;
 
     private List<Track> trackList;
 
@@ -40,7 +39,6 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.TrackViewHol
         this.onAdapterListener = onAdapterListener;
         this.context = context;
         inflater = LayoutInflater.from(context);
-        picasso = Picasso.with(context);
     }
 
     @Override
@@ -101,7 +99,8 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.TrackViewHol
             if (track.getAlbumArt() == null) {
                 imgAlbumArt.setImageResource(R.drawable.ic_placeholder_album_small);
             } else {
-                picasso.load(uriBuilder.path(track.getAlbumArt()).build())
+                Picasso.with(context)
+                        .load(uriBuilder.path(track.getAlbumArt()).build())
                         .into(imgAlbumArt);
             }
 
