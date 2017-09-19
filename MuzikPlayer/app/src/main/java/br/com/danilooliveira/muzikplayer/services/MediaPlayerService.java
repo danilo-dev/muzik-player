@@ -420,7 +420,6 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             mediaPlayer.pause();
         }
         mediaPlayer.stop();
-        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constants.ACTION_TRACK_LIST_CHANGED));
     }
 
     /**
@@ -484,10 +483,6 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
     public MediaPlayer getMediaPlayer() {
         return mediaPlayer;
-    }
-
-    public List<Track> getTrackList() {
-        return trackList;
     }
 
     public void setTrackList(List<Track> trackList) {

@@ -287,17 +287,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     @Override
-    protected BroadcastReceiver onTrackListChanged() {
-        return new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                playerBottomControl.setVisibility(View.GONE);
-                mTrackAdapter.setTrackList(mediaPlayerService.getTrackList());
-            }
-        };
-    }
-
-    @Override
     protected void onServiceConnected() {
         if (mediaPlayerService.getTotalDuration() > 0) {
             updateTrackInfo(mediaPlayerService.getCurrentTrack());

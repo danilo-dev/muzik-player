@@ -10,7 +10,6 @@ public interface Constants {
     String ACTION_REPEAT_TYPE_CHANGED = "br.com.danilooliveira.muzikplayer.intent.ACTION_REPEAT_TYPE_CHANGED";
     String ACTION_SHUFFLE_CHANGED = "br.com.danilooliveira.muzikplayer.intent.ACTION_SHUFFLE_CHANGED";
     String ACTION_TRACK_CHANGED = "br.com.danilooliveira.muzikplayer.intent.ACTION_TRACK_CHANGED";
-    String ACTION_TRACK_LIST_CHANGED = "br.com.danilooliveira.muzikplayer.intent.ACTION_TRACK_LIST_CHANGED";
 
     String BUNDLE_REPEAT_TYPE = "repeatType";
     String BUNDLE_SHUFFLE = "shuffle";
