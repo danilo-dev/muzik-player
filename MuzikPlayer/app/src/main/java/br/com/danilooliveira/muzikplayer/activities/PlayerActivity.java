@@ -39,6 +39,14 @@ public class PlayerActivity extends BaseActivity {
     private SimpleDateFormat timeFormatter = new SimpleDateFormat("mm:ss", Locale.getDefault());
     private Timer timer;
 
+    /**
+     * Booleano para indicar se o usuário está alterando a posição
+     * da música atual.
+     * É utilizado para evitar a atualização da "currentDuration"
+     * da música nas views, enquanto o usuário está alterando-na.
+     */
+    private boolean isChangingCurrentDuration = false;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +80,7 @@ public class PlayerActivity extends BaseActivity {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
+                isChangingCurrentDuration = true;
                 if (isPlaying = mediaPlayerService.isPlaying()) {
                     mediaPlayerService.playPause();
                 }
@@ -79,6 +88,7 @@ public class PlayerActivity extends BaseActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
+                isChangingCurrentDuration = false;
                 mediaPlayerService.setCurrentDuration(seekBar.getProgress());
                 if (isPlaying) {
                     mediaPlayerService.playPause();
@@ -256,14 +266,15 @@ public class PlayerActivity extends BaseActivity {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mediaPlayerService != null) {
+                if (!isChangingCurrentDuration
+                        && mediaPlayerService != null) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
                             updateDurationInfo();
                         }
-                    }
-                });
+                    });
+                }
             }
         }, 0, 17);
 
